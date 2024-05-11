@@ -1,26 +1,23 @@
 <?php
 
-namespace App\Models\Blog;
+namespace App\Models\Animal;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Category extends Model
+class Breed extends Model
 {
     use HasFactory;
 
-    protected $table = 'categories';
-
+    protected $table = 'breeds';
     protected $fillable = [
-        'name', 'slug', 'description', 'is_visible'
+        'breed_name', 'breed_description'
     ];
 
 
-    public function posts() : HasMany
+    public function dogs(): HasMany
     {
-        return $this->hasMany(Post::class);
+        return $this->hasMany(Dog::class);
     }
-
-
 }

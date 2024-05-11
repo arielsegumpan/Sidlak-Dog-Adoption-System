@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\Resources\Blog\CategoryResource\Pages;
+namespace App\Filament\Resources\Animal\DogResource\Pages;
 
-use App\Filament\Resources\Blog\CategoryResource;
+use App\Filament\Resources\Animal\DogResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
-class EditCategory extends EditRecord
+class EditDog extends EditRecord
 {
-    protected static string $resource = CategoryResource::class;
+    protected static string $resource = DogResource::class;
 
     protected function getHeaderActions(): array
     {
