@@ -1,11 +1,7 @@
 # Sidlak-Dog-Adoption-System
 Web-Based Adoption, Donation and Volunteering Report System for Unsheltered Dogs of Sidlak Animal Welfare Group of Victorias City
 
-Researcher Team:
-Nonilo Aujero
-Rey Oridina
-Glydel Villareza
-Mini Diaz
+Researcher Team: Nonilo Aujero, Rey Oridina, Glydel Villareza, Mini Diaz
 
 The Web-based adoption, Donation and volunteering Report System for unsheltered Dogs was intended to focus on enhancing the process and services of Sidlak Animal Welfare Group of Victorias City. It offers functionalities for the shelter to manage the adoption, donation and volunteering process, a web-based system that can be accessed online, and this was managed by designated administrators and staff that help manage,keep track, and maintain the system.
 The web-based platform facilitates the management of adoption, donation and volunteering processes, accessible remotely by designated administrators and staff.
