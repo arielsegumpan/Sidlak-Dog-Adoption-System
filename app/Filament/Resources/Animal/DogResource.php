@@ -6,16 +6,18 @@ use App\Filament\Resources\Animal\DogResource\Pages;
 use App\Filament\Resources\Animal\DogResource\RelationManagers;
 use App\Models\Animal\Dog;
 use Filament\Forms;
-use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -39,17 +41,17 @@ class DogResource extends Resource
                     TextInput::make('dog_name')->required()->maxLength(255),
                     Select::make('breed_id')->relationship('breed', 'breed_name')->required()->preload()->optionsLimit(8)->searchable()->native(false),
                     TextInput::make('age')->required()->numeric()->minValue(0),
-                    ColorPicker::make('color')->required()->default('white'),
+                    ColorPicker::make('dog_color')->required()->default('#ffffff'),
                     Select::make('dog_size')->required()->options([
                         'small' => 'Small',
                         'medium' => 'Medium',
                         'large' => 'Large',])->native(false),
-                    CheckboxList::make('adoption_status')
-                    ->required()->options([
-                        'available' => 'Available',
-                        'adopted' => 'Adopted',
-                    ])->columns(2),
-                    MarkdownEditor::make('dog_description')->required()->columnSpanFull(),
+                    ToggleButtons::make('is_adopted')
+                        ->label('Is Adopted?')
+                        ->boolean()
+                        ->grouped()
+                        ->default(false),
+                    MarkdownEditor::make('dog_description')->required()->columnSpanFull()->maxLength(65535),
 
                 ])->columns([
                     'sm' => 1,
@@ -59,7 +61,7 @@ class DogResource extends Resource
 
                 Section::make('Dog Profile Image')
                 ->schema([
-                    FileUpload::make('dog_image')->image()->required()->imageEditor() ->imageEditorAspectRatios([
+                    FileUpload::make('dog_img')->image()->required()->imageEditor() ->imageEditorAspectRatios([
                         null,
                         '1:1',
                         '4:3',
@@ -72,13 +74,20 @@ class DogResource extends Resource
     {
         return $table
             ->columns([
-                //
+                ImageColumn::make('dog_img')->circular()->label('Image'),
+                TextColumn::make('dog_name')->label('Name & Breed')
+                ->description(fn (Dog $record): string => $record?->breed?->breed_name)->wrap()->sortable()->searchable(),
+                TextColumn::make('dog_description')->wrap()->limit(50)->label('Description'),
             ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ])->tooltip('Actions')
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

@@ -19,8 +19,8 @@ return new class extends Migration
             $table->enum('dog_size', ['small', 'medium', 'large']);
             $table->string('dog_color');
             $table->string('dog_img');
-            $table->string('dog_description');
-            $table->enum('adoption_status', ['available', 'adopted']);
+            $table->text('dog_description');
+            $table->boolean('is_adopted')->default(false);
             $table->timestamps();
         });
     }

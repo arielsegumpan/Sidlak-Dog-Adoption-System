@@ -10,7 +10,7 @@ class AdoptionRequestObserver
     public function created(AdoptionRequest $adoptionRequest): void
     {
         Notification::make()
-        ->title('Adoption Request Created:' . $adoptionRequest->id)
+        ->title('Adoption Request by :' . $adoptionRequest->name)
         ->sendToDatabase($adoptionRequest->user);
     }
 }
