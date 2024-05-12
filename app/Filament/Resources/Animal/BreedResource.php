@@ -24,7 +24,7 @@ class BreedResource extends Resource
 {
     protected static ?string $model = Breed::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-information-circle';
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-group';
 
     protected static ?string $navigationGroup = 'Animal';
 
@@ -71,7 +71,7 @@ class BreedResource extends Resource
                 ->icon('heroicon-m-plus')
                 ->label(__('Create Breed')),
             ])
-            ->emptyStateIcon('heroicon-o-information-circle')
+            ->emptyStateIcon('heroicon-o-rectangle-group')
             ->emptyStateHeading('No breeds are created');
     }
 

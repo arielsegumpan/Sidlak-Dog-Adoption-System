@@ -9,4 +9,8 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateAdoptionRequest extends CreateRecord
 {
     protected static string $resource = AdoptionRequestResource::class;
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

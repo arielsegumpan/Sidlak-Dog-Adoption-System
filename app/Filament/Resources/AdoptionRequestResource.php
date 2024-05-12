@@ -17,7 +17,7 @@ class AdoptionRequestResource extends Resource
 {
     protected static ?string $model = AdoptionRequest::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-information-circle';
+    protected static ?string $navigationIcon = 'heroicon-o-inbox';
 
     public static function form(Form $form): Form
     {
@@ -43,7 +43,15 @@ class AdoptionRequestResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->deferLoading()
+            ->emptyStateActions([
+                Tables\Actions\CreateAction::make()
+                ->icon('heroicon-m-plus')
+                ->label(__('Create Adoption Request')),
+            ])
+            ->emptyStateIcon('heroicon-o-inbox')
+            ->emptyStateHeading('No request have been created');
     }
 
     public static function getRelations(): array
