@@ -20,4 +20,12 @@ class EditAdoptionRequest extends EditRecord
     {
         return $this->getResource()::getUrl('index');
     }
+
+
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        $data['is_approved'] = 1;
+
+        return $data;
+    }
 }

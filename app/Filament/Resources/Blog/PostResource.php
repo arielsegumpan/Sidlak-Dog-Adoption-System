@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Blog;
 
 use App\Filament\Resources\Blog\PostResource\Pages;
 use App\Filament\Resources\Blog\PostResource\RelationManagers;
+use App\Models\Blog\Category;
 use App\Models\Blog\Post;
 use Carbon\Carbon;
 use Filament\Forms;
@@ -14,12 +15,16 @@ use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Infolists\Infolist;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Str;
@@ -31,6 +36,8 @@ class PostResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     protected static ?string $navigationGroup = 'News and Events';
+
+    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {
@@ -62,7 +69,30 @@ class PostResource extends Resource
                             ->required()
                             ->native(false)
                             ->optionsLimit(8)
-                            ->preload(),
+                            ->preload()
+                            ->createOptionForm(
+                                [
+                                    TextInput::make('name')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(fn (string $operation, $state, Forms\Set $set) => $operation === 'create' ? $set('slug', Str::slug($state)) : null),
+
+                                    TextInput::make('slug')
+                                        ->disabled()
+                                        ->dehydrated()
+                                        ->required()
+                                        ->maxLength(255)
+                                        ->unique(Category::class, 'slug', ignoreRecord: true),
+
+                                    MarkdownEditor::make('description')
+                                        ->columnSpan('full'),
+
+                                    Toggle::make('is_visible')
+                                        ->label('Visible to adopters.')
+                                    ->default(true),
+                                ]
+                            ),
 
                         DatePicker::make('published_at')
                             ->label('Published Date')->native(false),
@@ -184,5 +214,21 @@ class PostResource extends Resource
             'create' => Pages\CreatePost::route('/create'),
             'edit' => Pages\EditPost::route('/{record}/edit'),
         ];
+    }
+
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                ImageEntry::make('image'),
+                TextEntry::make('title'),
+                TextEntry::make('slug'),
+                TextEntry::make('content'),
+                TextEntry::make('updated_at')
+                    ->dateTime(),
+            ])
+            ->columns(1)
+            ->inlineLabel();
     }
 }

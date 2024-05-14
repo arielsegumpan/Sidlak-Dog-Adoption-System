@@ -28,6 +28,8 @@ class BreedResource extends Resource
 
     protected static ?string $navigationGroup = 'Animal';
 
+    protected static ?int $navigationSort = 2;
+
     public static function form(Form $form): Form
     {
         return $form
@@ -37,7 +39,7 @@ class BreedResource extends Resource
                 ->description('All fields are required')
                 ->collapsible(true)
                 ->schema([
-                    TextInput::make('breed_name')->required()->maxLength(255),
+                    TextInput::make('breed_name')->required()->maxLength(255)->unique(ignoreRecord: true),
                     MarkdownEditor::make('breed_description')->maxLength(65535),
                 ])
             ]);
@@ -47,8 +49,8 @@ class BreedResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('breed_name')->sortable()->searchable(),
-                TextColumn::make('breed_description')->limit(50)->wrap(),
+                TextColumn::make('breed_name')->sortable()->searchable()->label('Breed'),
+                TextColumn::make('breed_description')->limit(50)->wrap()->label('Description'),
             ])
             ->filters([
                 //
@@ -96,8 +98,8 @@ class BreedResource extends Resource
     {
         return $infolist
             ->schema([
-                TextEntry::make('breed_name'),
-                TextEntry::make('breed_description'),
+                TextEntry::make('breed_name')->label('Breed'),
+                TextEntry::make('breed_description')->label('Description'),
                 TextEntry::make('updated_at')
                     ->dateTime(),
             ])

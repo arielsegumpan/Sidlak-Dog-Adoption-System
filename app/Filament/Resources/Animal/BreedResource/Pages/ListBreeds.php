@@ -16,5 +16,4 @@ class ListBreeds extends ListRecords
             Actions\CreateAction::make()->icon('heroicon-m-plus')->label('Breed'),
         ];
     }
-
 }

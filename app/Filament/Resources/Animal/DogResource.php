@@ -16,6 +16,8 @@ use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\ColorColumn;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -29,6 +31,8 @@ class DogResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static ?string $navigationGroup = 'Animal';
+
+    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {
@@ -78,6 +82,11 @@ class DogResource extends Resource
                 TextColumn::make('dog_name')->label('Name & Breed')
                 ->description(fn (Dog $record): string => $record?->breed?->breed_name)->wrap()->sortable()->searchable(),
                 TextColumn::make('dog_description')->wrap()->limit(50)->label('Description'),
+                IconColumn::make('is_adopted')
+                ->boolean()
+                ->trueIcon('heroicon-o-check-circle')
+                ->falseIcon('heroicon-o-x-circle'),
+                ColorColumn::make('dog_color')
             ])
             ->filters([
                 //
@@ -110,6 +119,8 @@ class DogResource extends Resource
             //
         ];
     }
+
+
 
     public static function getPages(): array
     {
