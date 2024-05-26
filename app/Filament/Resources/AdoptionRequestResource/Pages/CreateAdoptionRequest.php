@@ -23,44 +23,19 @@ class CreateAdoptionRequest extends CreateRecord
 
     protected function beforeCreate(): void
     {
-        $adoption = AdoptionRequest::with('dog:id,is_adopted,dog_name')->get();
-        $isAdoptedValues = $adoption->pluck('dog.is_adopted');
+        // $adoption = AdoptionRequest::with('dog:id,is_adopted,dog_name')->get();
+        // $isAdoptedValues = $adoption->pluck('dog.is_adopted');
 
 
-        if ($isAdoptedValues->contains(1)) {
+        // if ($isAdoptedValues->contains(1)) {
 
-            Notification::make()
-                ->warning()
-                ->title('Not available')
-                ->body('The selected dog is already adopted.')
-                ->color('danger')
-                ->send();
-            $this->halt();
-        }
+        //     Notification::make()
+        //         ->warning()
+        //         ->title('Not available')
+        //         ->body('The selected dog is already adopted.')
+        //         ->color('danger')
+        //         ->send();
+        //     $this->halt();
+        // }
     }
-
-
-    protected function beforeUpdate(): void
-    {
-        $adoption = AdoptionRequest::with('dog:id,is_adopted,dog_name')->get();
-        $isAdoptedValues = $adoption->pluck('dog.is_adopted');
-
-
-        if ($isAdoptedValues->contains(1)) {
-
-            Notification::make()
-                ->warning()
-                ->title('Not available')
-                ->body('The selected dog is already adopted.')
-                ->color('danger')
-                ->send();
-            $this->halt();
-        }
-    }
-
-
-
-
-
-
 }

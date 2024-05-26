@@ -7,8 +7,8 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
-        "filament/filament": "3.2.76",
-        "filament/notifications": "3.2.76",
+        "filament/filament": "3.2.82",
+        "filament/notifications": "3.2.82",
         "laravel/framework": "^11.0",
         "laravel/tinker": "^2.9"
     },

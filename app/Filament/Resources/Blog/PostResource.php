@@ -12,11 +12,13 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\MarkdownEditor;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
+use Filament\Forms\Set;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
@@ -27,6 +29,7 @@ use Filament\Tables\Table;
 use Filament\Infolists\Infolist;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
 class PostResource extends Resource
@@ -59,7 +62,7 @@ class PostResource extends Resource
                             ->maxLength(255)
                             ->unique(Post::class, 'slug', ignoreRecord: true),
 
-                        MarkdownEditor::make('content')
+                        RichEditor::make('content')
                             ->required()
                             ->columnSpan('full'),
 
@@ -76,7 +79,7 @@ class PostResource extends Resource
                                     ->required()
                                     ->maxLength(255)
                                     ->live(onBlur: true)
-                                    ->afterStateUpdated(fn (string $operation, $state, Forms\Set $set) => $operation === 'create' ? $set('slug', Str::slug($state)) : null),
+                                    ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state))),
 
                                     TextInput::make('slug')
                                         ->disabled()
@@ -224,7 +227,7 @@ class PostResource extends Resource
                 ImageEntry::make('image'),
                 TextEntry::make('title'),
                 TextEntry::make('slug'),
-                TextEntry::make('content'),
+                TextEntry::make('content')->formatStateUsing(fn (string $state): HtmlString => new HtmlString($state)),
                 TextEntry::make('updated_at')
                     ->dateTime(),
             ])

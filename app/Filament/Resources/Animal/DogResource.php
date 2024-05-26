@@ -11,6 +11,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Form;
@@ -43,7 +44,18 @@ class DogResource extends Resource
                 ->description('Please provide the following information about the dog.')
                 ->schema([
                     TextInput::make('dog_name')->required()->maxLength(255),
-                    Select::make('breed_id')->relationship('breed', 'breed_name')->required()->preload()->optionsLimit(8)->searchable()->native(false),
+                    Select::make('breed_id')->relationship('breed', 'breed_name')->required()->preload()->optionsLimit(8)->searchable()->native(false)
+                    ->createOptionForm([
+                        Section::make('Breed Details')
+                        ->icon('heroicon-o-information-circle')
+                        ->description('All fields are required')
+                        ->collapsible(true)
+                        ->schema([
+                            TextInput::make('breed_name')->required()->maxLength(255)->unique(ignoreRecord: true),
+                            Textarea::make('breed_description')->maxLength(500)->rows(6)
+                            ->cols(20),
+                        ])
+                    ]),
                     TextInput::make('age')->required()->numeric()->minValue(0),
                     ColorPicker::make('dog_color')->required()->default('#ffffff'),
                     Select::make('dog_size')->required()->options([

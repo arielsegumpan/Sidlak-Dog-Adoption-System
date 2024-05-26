@@ -13,7 +13,7 @@ class ListBreeds extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()->icon('heroicon-m-plus')->label('Breed'),
+            Actions\CreateAction::make()->icon('heroicon-m-plus')
         ];
     }
 }

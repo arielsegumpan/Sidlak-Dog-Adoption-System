@@ -8,6 +8,7 @@ use App\Models\Animal\Breed;
 use Filament\Forms;
 use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -40,7 +41,8 @@ class BreedResource extends Resource
                 ->collapsible(true)
                 ->schema([
                     TextInput::make('breed_name')->required()->maxLength(255)->unique(ignoreRecord: true),
-                    MarkdownEditor::make('breed_description')->maxLength(65535),
+                    Textarea::make('breed_description')->maxLength(500)->rows(6)
+                    ->cols(20),
                 ])
             ]);
     }

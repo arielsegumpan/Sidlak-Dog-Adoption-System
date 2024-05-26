@@ -19,8 +19,8 @@ class Dog extends Model
         return $this->belongsTo(Breed::class);
     }
 
-    protected function AdoptRequests() : HasMany
+    protected function AdoptionRequests() : HasMany
     {
-        return $this->hasMany(AdoptionRequest::class, 'dog_id');
+        return $this->hasMany(AdoptionRequest::class);
     }
 }

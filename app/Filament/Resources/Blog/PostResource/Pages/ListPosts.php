@@ -13,7 +13,7 @@ class ListPosts extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()->icon('heroicon-m-plus')->label('Create Post')
+            Actions\CreateAction::make()->icon('heroicon-m-plus')
             ->mutateFormDataUsing(function (array $data): array {
                 $data['user_id'] = auth()->id();
                 return $data;

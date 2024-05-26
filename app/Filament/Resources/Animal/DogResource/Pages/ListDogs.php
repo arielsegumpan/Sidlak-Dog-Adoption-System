@@ -16,7 +16,7 @@ class ListDogs extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()->icon('heroicon-m-plus')->label('Dog')
+            Actions\CreateAction::make()->icon('heroicon-m-plus')
             ->before(function (CreateAction $action, Dog $record) {
                 if ($record->is_adopted) {
                     Notification::make()

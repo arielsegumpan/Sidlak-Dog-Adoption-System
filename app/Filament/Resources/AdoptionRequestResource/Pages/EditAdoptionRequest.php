@@ -5,6 +5,7 @@ namespace App\Filament\Resources\AdoptionRequestResource\Pages;
 use App\Filament\Resources\AdoptionRequestResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Database\Eloquent\Model;
 
 class EditAdoptionRequest extends EditRecord
 {
@@ -22,10 +23,17 @@ class EditAdoptionRequest extends EditRecord
     }
 
 
-    protected function mutateFormDataBeforeCreate(array $data): array
-    {
-        $data['is_approved'] = 1;
+    // protected function mutateFormDataBeforeCreate(array $data): array
+    // {
+    //     $data['is_approved'] = 1;
 
-        return $data;
-    }
+    //     return $data;
+    // }
+
+    // protected function handleRecordUpdate(Model $record, array $data): Model
+    // {
+    //     $record->update($data);
+
+    //     return $record;
+    // }
 }
