@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Post\Category;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -21,6 +22,7 @@ return new class extends Migration
             $table->text('body');
             $table->boolean('is_featured')->default(false);
             $table->boolean('is_published')->default(false);
+            $table->foreignIdFor(Category::class)->nullable()->constrained()->cascadeOnDelete();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->timestamps();
         });

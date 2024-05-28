@@ -17,7 +17,8 @@ class BreedFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'breed_name' => $this->faker->unique()->sentence(2),
+            'breed_description' => $this->faker->realText(),
         ];
     }
 }
