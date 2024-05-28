@@ -9,14 +9,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Breed extends Model
 {
     use HasFactory;
-
     protected $table = 'breeds';
     protected $fillable = [
-        'breed_name', 'breed_description'
+        'breed_name',
+        'breed_description',
     ];
 
-
-    public function dogs(): HasMany
+    public function dogs() : HasMany
     {
         return $this->hasMany(Dog::class);
     }

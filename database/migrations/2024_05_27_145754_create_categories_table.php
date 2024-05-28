@@ -11,10 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('breeds', function (Blueprint $table) {
+        Schema::create('categories', function (Blueprint $table) {
             $table->id();
-            $table->string('breed_name')->unique();
-            $table->text('breed_description')->nullable();
+            $table->string('category_name');
+            $table->string('slug');
+            $table->text('description')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }
@@ -24,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('breeds');
+        Schema::dropIfExists('categories');
     }
 };

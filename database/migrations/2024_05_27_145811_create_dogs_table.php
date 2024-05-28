@@ -13,14 +13,15 @@ return new class extends Migration
     {
         Schema::create('dogs', function (Blueprint $table) {
             $table->id();
-            $table->string('dog_name');
+            $table->string('name');
             $table->foreignId('breed_id')->constrained()->cascadeOnDelete();
-            $table->string('age');
-            $table->enum('dog_size', ['small', 'medium', 'large']);
-            $table->string('dog_color');
-            $table->string('dog_img');
-            $table->text('dog_description');
-            $table->boolean('is_adopted')->default(false);
+            $table->integer('age')->nullable();
+            $table->string('gender');
+            $table->enum('size', ['Small', 'Medium', 'Large']);
+            $table->string('color');
+            $table->text('description');
+            $table->string('image')->nullable();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }

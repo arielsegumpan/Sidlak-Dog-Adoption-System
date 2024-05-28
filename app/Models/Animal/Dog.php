@@ -2,24 +2,39 @@
 
 namespace App\Models\Animal;
 
-use App\Models\AdoptionRequest;
+use App\Models\Adoption\AdoptionRequest;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Dog extends Model
 {
     use HasFactory;
     protected $table = 'dogs';
-    protected $guarded = ['id','created_at','updated_at'];
+    protected $fillable = [
+        'name',
+        'breed_id',
+        'age',
+        'gender',
+        'size',
+        'color',
+        'description',
+        'image',
+        'user_id',
+    ];
 
-    public function breed() : BelongsTo
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function breed()
     {
         return $this->belongsTo(Breed::class);
     }
 
-    protected function AdoptionRequests() : HasMany
+    public function adoption_requests() : HasMany
     {
         return $this->hasMany(AdoptionRequest::class);
     }

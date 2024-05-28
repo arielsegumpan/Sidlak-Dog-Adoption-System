@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Adoption;
 
 use App\Models\Animal\Dog;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,14 +11,22 @@ class AdoptionRequest extends Model
 {
     use HasFactory;
     protected $table = 'adoption_requests';
-    protected $guarded = ['id', 'created_at', 'updated_at'];
+    protected $fillable = [
+        'dog_id',
+        'user_id',
+        'status'
+    ];
 
-    public function user(): BelongsTo
+    protected $casts = [
+        'status' => 'boolean'
+    ];
+
+    public function dog() : BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Dog::class);
     }
 
-    public function dog(): BelongsTo
+    public function user() : BelongsTo
     {
         return $this->belongsTo(Dog::class);
     }
