@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
         //     'name' => 'Test User',
         //     'email' => 'test@example.com',
         // ]);
+
         $breeds = Breed::factory(10)->create();
         $breeds->each(function ($breed) {
             Dog::factory(5)->create(['breed_id' => $breed->id]);
@@ -31,13 +32,12 @@ class DatabaseSeeder extends Seeder
 
         User::factory(10)->create();
         $categories = Category::factory(30)->create();
-        $posts = Post::factory(1000)->create();
-        $posts->each(function ($post) use ($categories) {
-            $post->categories()->attach(
-                $categories->random(5)->pluck('id')->toArray()
-            );
 
-            Comment::factory(100)->create(['post_id' => $post->id]);
+        // For each category, create a number of posts
+        $categories->each(function ($category) {
+            Post::factory(10)->create(['category_id' => $category->id])->each(function ($post) {
+                Comment::factory(10)->create(['post_id' => $post->id]);
+            });
         });
     }
 }
