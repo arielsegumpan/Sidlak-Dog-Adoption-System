@@ -55,7 +55,6 @@ class PostResource extends Resource
                         Hidden::make('user_id')->default(auth()->user()->id),
                         TextInput::make('title')
                             ->required()
-                            ->live()
                             ->maxLength(255)
                             ->live(onBlur: true)
                             ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state))),
@@ -105,6 +104,10 @@ class PostResource extends Resource
 
                         DatePicker::make('published_at')
                             ->label('Published Date')->native(false)->required()->date(),
+
+                        Select::make('tags')
+                        ->multiple()->native(false)->searchable()->preload()->optionsLimit(6)
+                        ->required()->relationship(name:'tags', titleAttribute: 'tag_name'),
 
                         ToggleButtons::make('is_featured')
                             ->label('Is Featured?')
@@ -256,11 +259,13 @@ class PostResource extends Resource
                 ->schema([
                     TextEntry::make('title')->columnSpan(2),
                     TextEntry::make('slug'),
+                    TextEntry::make('tags.tag_name')->columnSpanFull()->badge()->color('primary'),
                     ImageEntry::make('image'),
                     TextEntry::make('body')->columnSpanFull()->label('Content')->html(),
                     IconEntry::make('is_featured'),
                     IconEntry::make('is_published'),
                 ])->columns([
+                    'default' => 3,
                     'sm' => 1,
                     'md' => 2,
                     'lg' => 3,
