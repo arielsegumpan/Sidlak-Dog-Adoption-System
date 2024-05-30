@@ -104,18 +104,19 @@ class PostResource extends Resource
                             }),
 
                         DatePicker::make('published_at')
-                            ->label('Published Date')->native(false),
+                            ->label('Published Date')->native(false)->required()->date(),
 
                         ToggleButtons::make('is_featured')
                             ->label('Is Featured?')
                             ->boolean()
                             ->inline()
-                            ->default(false),
+                            ->default(false)->required(),
 
                         Toggle::make('is_published')
                             ->label('Is published.')
                             ->inline(false)
                             ->default(true)
+                            ->required()
                     ])
                     ->columns(2),
 
@@ -152,7 +153,10 @@ class PostResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-
+                TextColumn::make('body')
+                    ->label('Content')
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->html(),
                 // TextColumn::make('status')
                 //     ->badge()
                 //     ->getStateUsing(fn (Post $record): string => $record->published_at?->isPast() ? 'Published' : 'Draft')
@@ -216,6 +220,7 @@ class PostResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])
+            ->striped()
             ->deferLoading()
             ->emptyStateActions([
                 Tables\Actions\CreateAction::make()
@@ -249,17 +254,17 @@ class PostResource extends Resource
                 ComponentsSection::make('Post Details')
                 ->icon('heroicon-o-document-text')
                 ->schema([
-                    ImageEntry::make('image')->columnSpanFull(),
                     TextEntry::make('title')->columnSpan(2),
-                    TextEntry::make('slug')->columnSpan(2),
-                    TextEntry::make('body')->columnSpanFull()->label('Content'),
+                    TextEntry::make('slug'),
+                    ImageEntry::make('image'),
+                    TextEntry::make('body')->columnSpanFull()->label('Content')->html(),
                     IconEntry::make('is_featured'),
                     IconEntry::make('is_published'),
                 ])->columns([
                     'sm' => 1,
                     'md' => 2,
                     'lg' => 3,
-                    'xl' => 4,
+                    'xl' => 3,
                 ])
             ]);
     }

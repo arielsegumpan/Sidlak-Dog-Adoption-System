@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('adoption_requests', function (Blueprint $table) {
             $table->id();
+            $table->string('adoption_number')->unique();
             $table->foreignId('dog_id')->nullable()->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->nullable()->constrained()->cascadeOnDelete();
             $table->boolean('status')->default(false);

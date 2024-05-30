@@ -10,6 +10,7 @@ use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\MarkdownEditor;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -64,7 +65,7 @@ class DogResource extends Resource
                     ])
                 ]),
                 TextInput::make('age')->required()->numeric()->minValue(0),
-                ColorPicker::make('dog_color')->required()->default('#ffffff'),
+                ColorPicker::make('color')->required()->default('#ffffff'),
                 Select::make('size')->required()->options([
                     'small' => 'Small',
                     'medium' => 'Medium',
@@ -74,7 +75,7 @@ class DogResource extends Resource
                 //     ->boolean()
                 //     ->grouped()
                 //     ->default(false),
-                MarkdownEditor::make('description')->required()->columnSpanFull()->maxLength(65535),
+                RichEditor::make('description')->required()->columnSpanFull()->maxLength(65535),
 
             ])->columns([
                 'sm' => 1,
@@ -100,12 +101,12 @@ class DogResource extends Resource
                 ImageColumn::make('image')->circular()->label('Avatar'),
                 TextColumn::make('name')->label('Name & Breed')
                 ->description(fn (Dog $record): string => $record?->breed?->breed_name)->wrap()->sortable()->searchable(),
-                TextColumn::make('description')->wrap()->limit(50)->label('Description'),
+                TextColumn::make('description')->wrap()->limit(50)->label('Description')->html(),
                 // IconColumn::make('is_adopted')
                 // ->boolean()
                 // ->trueIcon('heroicon-o-check-circle')
                 // ->falseIcon('heroicon-o-x-circle'),
-                ColorColumn::make('dog_color')
+                ColorColumn::make('color')
             ])
             ->filters([
                 //
@@ -156,8 +157,8 @@ class DogResource extends Resource
                 TextEntry::make('name'),
                 TextEntry::make('breed.breed_name'),
                 TextEntry::make('age'),
-                TextEntry::make('description'),
-                ColorEntry::make('dog_color'),
+                TextEntry::make('description')->html(),
+                ColorEntry::make('color'),
                 // IconEntry::make('is_adopted')
                 // ->boolean()
             ])
