@@ -90,4 +90,10 @@ class BreedResource extends Resource
             'edit' => Pages\EditBreed::route('/{record}/edit'),
         ];
     }
+
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
 }

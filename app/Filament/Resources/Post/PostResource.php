@@ -292,34 +292,25 @@ class PostResource extends Resource
             ->schema([
                 ComponentsSection::make()
                 ->schema([
-                    ImageEntry::make('image')->label(''),
+                    // ImageEntry::make('image')->label(''),
+                    TextEntry::make('title'),
+                    TextEntry::make('slug'),
+                    TextEntry::make('tags.tag_name')->badge()->color('success'),
+                    IconEntry::make('is_featured')->label('Is Featured?')->inlineLabel(false),
+                    IconEntry::make('is_published')->label('Is Published?')->inlineLabel(false),
                 ])->columns([
                     'default' => 2,
                     'sm' => 1,
                     'md' => 2,
-                ])->columnSpan(1),
-
-                ComponentsSection::make()
-                ->schema([
-                    IconEntry::make('is_featured')->label('Is Featured?')->inlineLabel(),
-                    IconEntry::make('is_published')->label('Is Published?')->inlineLabel(),
-                ])->columnSpan(1),
-
-                ComponentsSection::make()
-                ->schema([
-                    TextEntry::make('tags.tag_name')->badge()->color('success'),
-                ])->columnSpanFull(),
-
-                ComponentsSection::make()
-                // ->icon('heroicon-o-document-text')
-                ->schema([
-                    TextEntry::make('body')->columnSpanFull()->label('Content')->html()->markdown(),
                 ]),
 
-            ])->columns([
-                'default' => 3,
-                'sm' => 1,
-                'md' => 3,
+                ComponentsSection::make('Content')
+                // ->icon('heroicon-o-document-text')
+                ->collapsible(true)
+                ->schema([
+                    TextEntry::make('body')->columnSpanFull()->label('')->html()->markdown(),
+                ]),
+
             ]);
     }
 }

@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Dog extends Model
 {
@@ -34,8 +35,8 @@ class Dog extends Model
         return $this->belongsTo(Breed::class);
     }
 
-    public function adoption_requests() : HasMany
+    public function adoption_request() : HasOne
     {
-        return $this->hasMany(AdoptionRequest::class);
+        return $this->hasOne(AdoptionRequest::class);
     }
 }

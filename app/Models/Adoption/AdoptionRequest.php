@@ -12,6 +12,7 @@ class AdoptionRequest extends Model
     use HasFactory;
     protected $table = 'adoption_requests';
     protected $fillable = [
+        'adoption_number',
         'dog_id',
         'user_id',
         'status'

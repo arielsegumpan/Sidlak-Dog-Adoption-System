@@ -165,4 +165,10 @@ class DogResource extends Resource
             ->columns(1)
             ->inlineLabel();
     }
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
+
 }
