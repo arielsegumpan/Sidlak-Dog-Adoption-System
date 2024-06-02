@@ -56,7 +56,6 @@ class CategoryResource extends Resource
 
                 ])
                 ->columns([
-
                     'sm' => 1,
                     'md' => 2,
                     'lg' => 2,

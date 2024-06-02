@@ -6,6 +6,7 @@ use App\Filament\Resources\Post\PostResource\Pages;
 use App\Filament\Resources\Post\PostResource\RelationManagers;
 use App\Models\Post\Category;
 use App\Models\Post\Post;
+use App\Models\Post\Tag;
 use Carbon\Carbon;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms;
@@ -103,11 +104,27 @@ class PostResource extends Resource
                             }),
 
                         DatePicker::make('published_at')
-                            ->label('Published Date')->native(false)->required()->date(),
+                            ->label('Published Date')->native(false)->date()
+                            ->default(now()),
 
                         Select::make('tags')
                         ->multiple()->native(false)->searchable()->preload()->optionsLimit(6)
-                        ->required()->relationship(name:'tags', titleAttribute: 'tag_name'),
+                        ->required()->relationship(name:'tags', titleAttribute: 'tag_name')
+                        ->createOptionForm([
+                            TextInput::make('tag_name')->required()->maxLength(255)
+                            ->live(onBlur: true)->unique(Tag::class, 'tag_name', ignoreRecord: true)
+                            ->afterStateUpdated(fn (Set $set, ?string $state) => $set('tag_slug', Str::slug($state))),
+                            TextInput::make('tag_slug')
+                            ->label('Slug')
+                            ->disabled()
+                            ->dehydrated()
+                            ->required()
+                            ->maxLength(255)
+                            ->unique(Tag::class, 'tag_slug', ignoreRecord: true),
+                            Textarea::make('tag_description')
+                            ->label('Description')
+                            ->maxLength(500)->columnSpanFull()->rows(7)->cols(10)
+                        ])->columns(2),
 
                         ToggleButtons::make('is_featured')
                             ->label('Is Featured?')
