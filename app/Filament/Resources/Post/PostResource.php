@@ -3,7 +3,9 @@
 namespace App\Filament\Resources\Post;
 
 use App\Filament\Resources\Post\PostResource\Pages;
+use App\Filament\Resources\Post\PostResource\Pages\EditPost;
 use App\Filament\Resources\Post\PostResource\RelationManagers;
+use App\Filament\Resources\PostResource\Pages\ViewPost;
 use App\Models\Post\Category;
 use App\Models\Post\Post;
 use App\Models\Post\Tag;
@@ -28,6 +30,8 @@ use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\Section as ComponentsSection;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
+use Filament\Pages\Page;
+use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\IconColumn;
@@ -46,6 +50,8 @@ class PostResource extends Resource
     protected static ?string $navigationGroup = 'News and Events';
 
     protected static ?int $navigationSort = 1;
+
+    protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function form(Form $form): Form
     {
@@ -167,7 +173,7 @@ class PostResource extends Resource
 
                 TextColumn::make('title')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()->wrap()->limit(30),
 
                 TextColumn::make('slug')
                     ->searchable()
@@ -251,6 +257,17 @@ class PostResource extends Resource
             ->emptyStateHeading('No posts are created');
     }
 
+
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        return $page->generateNavigationItems([
+            ViewPost::class,
+            Pages\EditPost::class,
+        ]);
+    }
+
+
+
     public static function getRelations(): array
     {
         return [
@@ -258,12 +275,14 @@ class PostResource extends Resource
         ];
     }
 
+
     public static function getPages(): array
     {
         return [
             'index' => Pages\ListPosts::route('/'),
             'create' => Pages\CreatePost::route('/create'),
             'edit' => Pages\EditPost::route('/{record}/edit'),
+            'view' => ViewPost::route('/{record}'),
         ];
     }
 
@@ -271,23 +290,36 @@ class PostResource extends Resource
     {
         return $infolist
             ->schema([
-                ComponentsSection::make('Post Details')
-                ->icon('heroicon-o-document-text')
+                ComponentsSection::make()
                 ->schema([
-                    TextEntry::make('title')->columnSpan(2),
-                    TextEntry::make('slug'),
-                    TextEntry::make('tags.tag_name')->columnSpanFull()->badge()->color('primary'),
-                    ImageEntry::make('image'),
-                    TextEntry::make('body')->columnSpanFull()->label('Content')->html(),
-                    IconEntry::make('is_featured'),
-                    IconEntry::make('is_published'),
+                    ImageEntry::make('image')->label(''),
                 ])->columns([
-                    'default' => 3,
+                    'default' => 2,
                     'sm' => 1,
                     'md' => 2,
-                    'lg' => 3,
-                    'xl' => 3,
-                ])
+                ])->columnSpan(1),
+
+                ComponentsSection::make()
+                ->schema([
+                    IconEntry::make('is_featured')->label('Is Featured?')->inlineLabel(),
+                    IconEntry::make('is_published')->label('Is Published?')->inlineLabel(),
+                ])->columnSpan(1),
+
+                ComponentsSection::make()
+                ->schema([
+                    TextEntry::make('tags.tag_name')->badge()->color('success'),
+                ])->columnSpanFull(),
+
+                ComponentsSection::make()
+                // ->icon('heroicon-o-document-text')
+                ->schema([
+                    TextEntry::make('body')->columnSpanFull()->label('Content')->html()->markdown(),
+                ]),
+
+            ])->columns([
+                'default' => 3,
+                'sm' => 1,
+                'md' => 3,
             ]);
     }
 }
