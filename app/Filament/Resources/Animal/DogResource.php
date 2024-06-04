@@ -102,6 +102,18 @@ class DogResource extends Resource
                 TextColumn::make('name')->label('Name & Breed')
                 ->description(fn (Dog $record): string => $record?->breed?->breed_name)->wrap()->sortable()->searchable(),
                 TextColumn::make('description')->wrap()->limit(50)->label('Description')->html(),
+                IconColumn::make('adoption_request.status')
+                ->icon(fn (string $state): string => match ($state) {
+                    'adopted' => 'heroicon-o-check-circle',
+                    'pending' => 'heroicon-o-clock',
+                    'cancelled' => 'heroicon-o-x-circle',
+                })
+                ->color(fn (string $state): string => match ($state) {
+                    'adopted' => 'success',
+                    'pending' => 'warning',
+                    'cancelled' => 'danger',
+                    default => 'gray',
+                }),
                 // IconColumn::make('is_adopted')
                 // ->boolean()
                 // ->trueIcon('heroicon-o-check-circle')
@@ -159,6 +171,7 @@ class DogResource extends Resource
                 TextEntry::make('age'),
                 TextEntry::make('description')->html(),
                 ColorEntry::make('color'),
+
                 // IconEntry::make('is_adopted')
                 // ->boolean()
             ])

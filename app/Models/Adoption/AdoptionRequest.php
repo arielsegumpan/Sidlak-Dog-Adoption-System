@@ -3,6 +3,7 @@
 namespace App\Models\Adoption;
 
 use App\Models\Animal\Dog;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -18,9 +19,9 @@ class AdoptionRequest extends Model
         'status'
     ];
 
-    protected $casts = [
-        'status' => 'boolean'
-    ];
+    // protected $casts = [
+    //     'status' => 'boolean'
+    // ];
 
     public function dog() : BelongsTo
     {
@@ -29,6 +30,6 @@ class AdoptionRequest extends Model
 
     public function user() : BelongsTo
     {
-        return $this->belongsTo(Dog::class);
+        return $this->belongsTo(User::class);
     }
 }

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('adoption_number')->unique();
             $table->foreignId('dog_id')->nullable()->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->nullable()->constrained()->cascadeOnDelete();
-            $table->enum('status', ['pending', 'accepted', 'rejected'])->default('pending');
+            $table->enum('status', ['adopted', 'available', 'pending',  'cancelled'])->default('pending');
             $table->timestamps();
         });
     }

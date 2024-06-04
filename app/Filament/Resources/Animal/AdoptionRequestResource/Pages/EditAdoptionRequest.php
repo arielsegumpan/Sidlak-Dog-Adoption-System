@@ -21,4 +21,12 @@ class EditAdoptionRequest extends EditRecord
     {
         return $this->getResource()::getUrl('index');
     }
+
+
+    // protected function beforeFill(): void
+    // {
+    //     $dog_name = $this->getRecord()->dog->name;
+
+
+    // }
 }

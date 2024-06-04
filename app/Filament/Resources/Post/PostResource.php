@@ -79,6 +79,7 @@ class PostResource extends Resource
                             ->columnSpan('full'),
                         TextInput::make('excerpt')->required()->maxLength(255),
                         Select::make('category_id')
+                        
                             ->relationship(name:'category', titleAttribute:'category_name')
                             ->searchable()
                             ->required()
