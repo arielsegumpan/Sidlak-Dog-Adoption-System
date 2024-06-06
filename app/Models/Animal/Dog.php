@@ -2,10 +2,10 @@
 
 namespace App\Models\Animal;
 
-use App\Models\Adoption\AdoptionRequest;
-use App\Models\User;
+use App\Models\Adoption\Adoption;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
@@ -14,29 +14,50 @@ class Dog extends Model
     use HasFactory;
     protected $table = 'dogs';
     protected $fillable = [
-        'name',
+        'dog_name',
+        'dog_age',
         'breed_id',
-        'age',
-        'gender',
-        'size',
-        'color',
-        'description',
-        'image',
-        'user_id',
+        'dog_size',
+        'dog_gender',
+        'dog_description',
+        'dog_image',
+        'status',
     ];
 
-    public function user()
+    protected $casts = [
+        'dog_image' => 'array',
+    ];
+
+    public function getFirstDogImageAttribute()
     {
-        return $this->belongsTo(User::class);
+        $images = $this->dog_image;
+        return $images[0] ?? null;
     }
 
-    public function breed()
+
+
+    public function breed() : BelongsTo
     {
         return $this->belongsTo(Breed::class);
     }
 
-    public function adoption_request() : HasOne
+    public function adoption() : HasOne
     {
-        return $this->hasOne(AdoptionRequest::class);
+        return $this->hasOne(Adoption::class);
+    }
+
+    // public function fosters()
+    // {
+    //     return $this->hasMany(Foster::class);
+    // }
+
+    // public function testimonials()
+    // {
+    //     return $this->hasMany(Testimonial::class);
+    // }
+
+    public function medicalRecords() : HasMany
+    {
+        return $this->hasMany(MedicalRecord::class);
     }
 }

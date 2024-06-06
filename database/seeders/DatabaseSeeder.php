@@ -3,11 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Animal\Breed;
-use App\Models\Animal\Dog;
-use App\Models\Post\Category;
-use App\Models\Post\Comment;
-use App\Models\Post\Post;
-use App\Models\User;
+use Illuminate\Support\Str;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -18,26 +14,31 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $dogBreeds = [
+            'Aspin',
+            'Labrador Retriever',
+            'German Shepherd',
+            'Golden Retriever',
+            'Beagle',
+            'Siberian Husky',
+        ];
 
-        // User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+        $breedImages = [
+            'Aspin' => 'aspin.jpg',
+            'Labrador Retriever' => 'labrador_retriever.jpg',
+            'German Shepherd' => 'german_shepherd.jpg',
+            'Golden Retriever' => 'golden_retriever.jpg',
+            'Beagle' => 'beagle.jpg',
+            'Siberian Husky' => 'siberian_husky.jpg',
+        ];
 
-        $breeds = Breed::factory(10)->create();
-        $breeds->each(function ($breed) {
-            Dog::factory(5)->create(['breed_id' => $breed->id]);
-        });
+        foreach ($dogBreeds as $breedName) {
+            Breed::factory()->create([
+                'breed_name' => $breedName,
+                'breed_slug' => Str::slug($breedName),
+                'breed_image' => $breedImages[$breedName],
+            ]);
+        }
 
-        User::factory(10)->create();
-        $categories = Category::factory(30)->create();
-
-        // For each category, create a number of posts
-        $categories->each(function ($category) {
-            Post::factory(10)->create(['category_id' => $category->id])->each(function ($post) {
-                Comment::factory(10)->create(['post_id' => $post->id]);
-            });
-        });
     }
 }

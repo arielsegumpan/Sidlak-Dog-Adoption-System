@@ -6,16 +6,20 @@ use App\Filament\Resources\Animal\BreedResource\Pages;
 use App\Filament\Resources\Animal\BreedResource\RelationManagers;
 use App\Models\Animal\Breed;
 use Filament\Forms;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Str;
 
 class BreedResource extends Resource
 {
@@ -36,9 +40,26 @@ class BreedResource extends Resource
                 ->description('All fields are required')
                 ->collapsible(true)
                 ->schema([
-                    TextInput::make('breed_name')->required()->maxLength(255)->unique(ignoreRecord: true),
-                    Textarea::make('breed_description')->maxLength(1024)->rows(6)
-                    ->cols(20),
+                    TextInput::make('breed_name')->required()
+                    ->maxLength(255)
+                    ->live(onBlur: true)
+                    ->afterStateUpdated(fn (Set $set, ?string $state) => $set('breed_slug', Str::slug($state))),
+
+                    TextInput::make('breed_slug')
+                    ->disabled()
+                    ->dehydrated()
+                    ->required()
+                    ->maxLength(255)
+                    ->unique(Breed::class, 'breed_slug', ignoreRecord: true),
+
+                    Textarea::make('breed_description')->maxLength(1024)->rows(6)->cols(20),
+
+                    FileUpload::make('breed_image')->image()->maxSize(1024)->imageEditor()
+                    ->imageEditorAspectRatios([
+                        '16:9',
+                        '4:3',
+                        '1:1',
+                    ])
                 ])
             ]);
     }
@@ -47,6 +68,7 @@ class BreedResource extends Resource
     {
         return $table
             ->columns([
+                ImageColumn::make('breed_image')->circular()->label('Image'),
                 TextColumn::make('breed_name')->sortable()->searchable()->label('Breed'),
                 TextColumn::make('breed_description')->limit(50)->wrap()->label('Description'),
             ])
@@ -89,11 +111,5 @@ class BreedResource extends Resource
             'create' => Pages\CreateBreed::route('/create'),
             'edit' => Pages\EditBreed::route('/{record}/edit'),
         ];
-    }
-
-
-    public static function getNavigationBadge(): ?string
-    {
-        return static::getModel()::count();
     }
 }

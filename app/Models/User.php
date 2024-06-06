@@ -4,15 +4,13 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
-use App\Models\Adoption\AdoptionRequest;
-use App\Models\Animal\Dog;
+use App\Models\Adoption\Adoption;
+use App\Models\Blog\BlogPost;
+use App\Models\Blog\Comment;
 use App\Models\Donation\Donation;
-use App\Models\Post\Comment;
-use App\Models\Post\Post;
 use App\Models\Volunteer\Volunteer;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -54,35 +52,35 @@ class User extends Authenticatable
         ];
     }
 
-
-    public function dogs() : HasMany
+    public function adoptions() : HasMany
     {
-        return $this->hasMany(Dog::class);
+        return $this->hasMany(Adoption::class);
     }
 
-    public function adoption_requests() : HasMany
-    {
-        return $this->hasMany(AdoptionRequest::class);
-    }
-
-    public function posts() : HasMany
-    {
-        return $this->hasMany(Post::class);
-    }
-
-    public function comments() : HasMany
-    {
-        return $this->hasMany(Comment::class);
-    }
-
-    public function volunteer() : HasOne
-    {
-        return $this->hasOne(Volunteer::class);
-    }
+    // public function fosters()
+    // {
+    //     return $this->hasMany(Foster::class);
+    // }
 
     public function donations() : HasMany
     {
         return $this->hasMany(Donation::class);
+    }
+
+    public function volunteers() : HasMany
+    {
+        return $this->hasMany(Volunteer::class);
+    }
+
+
+    public function blogPosts()
+    {
+        return $this->hasMany(BlogPost::class, 'author_id');
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
     }
 
 }

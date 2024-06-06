@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\Resources\Animal\BreedResource\Pages;
+namespace App\Filament\Resources\Blog\CategoryResource\Pages;
 
-use App\Filament\Resources\Animal\BreedResource;
+use App\Filament\Resources\Blog\CategoryResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
-class ListBreeds extends ListRecords
+class ListCategories extends ListRecords
 {
-    protected static string $resource = BreedResource::class;
+    protected static string $resource = CategoryResource::class;
 
     protected function getHeaderActions(): array
     {
