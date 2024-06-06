@@ -16,7 +16,7 @@ class DogStatsOverview extends BaseWidget
             Stat::make('Dogs', Dog::all()->count())
             ->color('primary'),
             Stat::make('Available for adoption',  $getAvailable)->color('success'),
-            Stat::make('Total Adopted', $getAdopted)->color('success'),
+            Stat::make('Total Dogs Adopted', $getAdopted)->color('success'),
         ];
     }
 }

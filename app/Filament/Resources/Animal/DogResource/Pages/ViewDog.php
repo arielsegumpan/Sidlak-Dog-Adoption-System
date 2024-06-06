@@ -25,4 +25,8 @@ class ViewDog extends ViewRecord
         return $data;
     }
 
+    protected function getActions(): array
+    {
+        return [];
+    }
 }

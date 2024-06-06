@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Blog;
 use App\Filament\Resources\Blog\BlogPostResource\Pages;
 use App\Filament\Resources\Blog\BlogPostResource\RelationManagers;
 use App\Models\Blog\BlogPost;
+use App\Models\Blog\Category;
 use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
@@ -14,10 +15,19 @@ use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Forms\Set;
+use Filament\Infolists\Components\Group;
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\Section as ComponentsSection;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\TextEntry\TextEntrySize;
+use Filament\Infolists\Infolist;
+use Filament\Pages\SubNavigationPosition;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\ImageColumn;
@@ -38,6 +48,8 @@ class BlogPostResource extends Resource
     protected static ?string $label = 'Post';
 
     protected static ?int $navigationSort = 1;
+
+    protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
     public static function form(Form $form): Form
     {
@@ -64,55 +76,40 @@ class BlogPostResource extends Resource
                             ->required()
                             ->columnSpan('full'),
 
-                        // Select::make('category_id')
-                        //     ->relationship(name:'category', titleAttribute:'category_name')
-                        //     ->searchable()
-                        //     ->required()
-                        //     ->native(false)
-                        //     ->optionsLimit(8)
-                        //     ->preload()
-                        //     ->createOptionForm(
-                        //         [
-                        //             TextInput::make('category_name')
-                        //             ->required()
-                        //             ->maxLength(255)
-                        //             ->live(onBlur: true)
-                        //             ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state))),
+                        Select::make('categories')
+                        ->multiple()->native(false)->searchable()->preload()->optionsLimit(6)
+                        ->required()->relationship(name:'categories', titleAttribute: 'category_name')
+                        ->createOptionForm([
+                            Section::make('Category Details')
+                            ->description('All fields are required')
+                            ->schema([
+                                TextInput::make('category_name')
+                                ->required()->maxLength(255)
+                                ->unique(Category::class, 'category_name', ignoreRecord: true)
+                                ->live(onBlur: true)
+                                ->afterStateUpdated(fn (Set $set, ?string $state) => $set('category_slug', Str::slug($state)))
+                                ->columnSpan(1),
 
-                        //             TextInput::make('slug')
-                        //                 ->disabled()
-                        //                 ->dehydrated()
-                        //                 ->required()
-                        //                 ->maxLength(255)
-                        //                 ->unique(Category::class, 'slug', ignoreRecord: true),
+                                TextInput::make('category_slug')
+                                ->disabled()
+                                ->dehydrated()
+                                ->required()
+                                ->maxLength(255)
+                                ->unique(Category::class, 'category_slug', ignoreRecord: true)
+                                ->columnSpan(1),
 
-                        //             MarkdownEditor::make('description')
-                        //                 ->columnSpan('full'),
-                        //         ]
-                        //     )->createOptionAction(function (Action $action) {
-                        //         return $action
-                        //             ->modalHeading('Create category')
-                        //             ->modalSubmitActionLabel('Create category');
-                        //     }),
+                                Textarea::make('category_description')->maxLength(1024)->columnSpanFull()->rows(7)
 
-                        // Select::make('tags')
-                        // ->multiple()->native(false)->searchable()->preload()->optionsLimit(6)
-                        // ->required()->relationship(name:'tags', titleAttribute: 'tag_name')
-                        // ->createOptionForm([
-                        //     TextInput::make('tag_name')->required()->maxLength(255)
-                        //     ->live(onBlur: true)->unique(Tag::class, 'tag_name', ignoreRecord: true)
-                        //     ->afterStateUpdated(fn (Set $set, ?string $state) => $set('tag_slug', Str::slug($state))),
-                        //     TextInput::make('tag_slug')
-                        //     ->label('Slug')
-                        //     ->disabled()
-                        //     ->dehydrated()
-                        //     ->required()
-                        //     ->maxLength(255)
-                        //     ->unique(Tag::class, 'tag_slug', ignoreRecord: true),
-                        //     Textarea::make('tag_description')
-                        //     ->label('Description')
-                        //     ->maxLength(500)->columnSpanFull()->rows(7)->cols(10)
-                        // ])->columns(2),
+                            ])
+                            ->columns([
+                                'sm' => 1,
+                                'md' => 2,
+                                'lg' => 2,
+                                'xl' => 2,
+                                'default' => 2
+                                ])
+
+                        ])->columns(2),
 
                         Toggle::make('is_published')
                             ->label('Is published.')
@@ -145,10 +142,10 @@ class BlogPostResource extends Resource
         return $table
             ->columns([
                 ImageColumn::make('post_image')->label('Featured Image'),
-                TextColumn::make('post_title')->sortable()->searchable()->label('Title'),
+                TextColumn::make('post_title')->sortable()->searchable()->label('Title')->wrap()->limit(70),
                 TextColumn::make('post_slug')->sortable()->label('Slug')->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('post_content')->wrap()->limit(50)->label('Content')->html()->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('categories.category_name')->label('Category'),
+                TextColumn::make('categories.category_name')->label('Category')->wrap()->badge(),
             ])
             ->filters([
                 //
@@ -176,11 +173,21 @@ class BlogPostResource extends Resource
             ->emptyStateHeading('No posts are created');
     }
 
+
+
     public static function getRelations(): array
     {
         return [
             //
         ];
+    }
+
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        return $page->generateNavigationItems([
+            Pages\ViewBlogPost::class,
+            Pages\EditBlogPost::class,
+        ]);
     }
 
     public static function getPages(): array
@@ -189,6 +196,36 @@ class BlogPostResource extends Resource
             'index' => Pages\ListBlogPosts::route('/'),
             'create' => Pages\CreateBlogPost::route('/create'),
             'edit' => Pages\EditBlogPost::route('/{record}/edit'),
+            'view' => Pages\ViewBlogPost::route('/{record}'),
         ];
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+               ComponentsSection::make('Post Details')
+               ->description('The following information is used to display the post on the website.')
+               ->schema([
+                    ImageEntry::make('post_image')->width('full')->height('300px'),
+                    Group::make([
+                        TextEntry::make('post_title')->label('Title')->size(TextEntrySize::Large),
+                        TextEntry::make('post_slug')->label('Slug'),
+                        TextEntry::make('categories.category_name')->badge(),
+                    ])
+
+               ])->compact()->collapsible()
+               ->columns([
+                    'sm' => 1,
+                    'md' => 2,
+                    'lg' => 2,
+                    'xl' => 2,
+                    'default' => 2
+               ]),
+               ComponentsSection::make('Content')
+               ->schema([
+                    TextEntry::make('post_content')->html()->label(''),
+               ])->collapsed()->collapsible()
+            ]);
     }
 }
