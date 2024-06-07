@@ -11,6 +11,10 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Forms\Set;
+use Filament\Infolists\Components\Section as ComponentsSection;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\TextEntry\TextEntrySize;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
@@ -112,5 +116,24 @@ class CategoryResource extends Resource
             'create' => Pages\CreateCategory::route('/create'),
             'edit' => Pages\EditCategory::route('/{record}/edit'),
         ];
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+               ComponentsSection::make('Category')
+               ->schema([
+                   TextEntry::make('category_name')->size(TextEntrySize::Medium)->label('Name'),
+                   TextEntry::make('category_slug')->size(TextEntrySize::Medium)->label('Slug'),
+                   TextEntry::make('category_description')->color('light')->label('Description')->columnSpanFull(),
+               ])
+               ->columns([
+                   'sm' => 1,
+                   'md' => 2,
+                   'lg' => 2,
+                   'default' => 2
+               ])->collapsible()
+            ]);
     }
 }

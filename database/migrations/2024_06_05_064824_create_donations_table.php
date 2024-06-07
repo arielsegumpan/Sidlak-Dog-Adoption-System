@@ -17,6 +17,7 @@ return new class extends Migration
             $table->decimal('amount', 10, 2);
             $table->enum('donation_type', ['one-time', 'monthly']);
             $table->text('donation_message')->nullable();
+            $table->string('donation_image')->nullable();
             $table->boolean('is_verified')->default(false);
             $table->date('donation_date')->nullable();
             $table->timestamps();

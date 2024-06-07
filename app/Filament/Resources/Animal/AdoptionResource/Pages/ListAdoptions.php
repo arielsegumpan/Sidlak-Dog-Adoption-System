@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\Resources\Volunteer\VolunteerResource\Pages;
+namespace App\Filament\Resources\Animal\AdoptionResource\Pages;
 
-use App\Filament\Resources\Volunteer\VolunteerResource;
+use App\Filament\Resources\Animal\AdoptionResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
-class ListVolunteers extends ListRecords
+class ListAdoptions extends ListRecords
 {
-    protected static string $resource = VolunteerResource::class;
+    protected static string $resource = AdoptionResource::class;
 
     protected function getHeaderActions(): array
     {
@@ -16,4 +16,6 @@ class ListVolunteers extends ListRecords
             Actions\CreateAction::make()->icon('heroicon-m-plus'),
         ];
     }
+
+
 }

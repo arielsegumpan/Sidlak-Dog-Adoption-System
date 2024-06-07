@@ -14,7 +14,7 @@ class Adoption extends Model
 
     protected $table = 'adoptions';
     protected $fillable = [
-        'user_id', 'dog_id', 'status', 'is_approved', 'application_date', 'approval_date'
+        'adoption_number', 'user_id', 'dog_id', 'status', 'request_date'
     ];
 
     public function user() : BelongsTo

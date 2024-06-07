@@ -5,17 +5,11 @@ namespace App\Filament\Resources\Animal\DogResource\Pages;
 use App\Filament\Resources\Animal\DogResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
+use Illuminate\Contracts\Support\Htmlable;
 
 class ViewDog extends ViewRecord
 {
     protected static string $resource = DogResource::class;
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\EditAction::make(),
-        ];
-    }
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
@@ -23,6 +17,13 @@ class ViewDog extends ViewRecord
         $data['dog_size'] = ucfirst($data['dog_size']);
 
         return $data;
+    }
+
+    public function getTitle(): string | Htmlable
+    {
+        /** @var Dog */
+        $record = $this->getRecord();
+        return $record->dog_name . ' - ' . $record->breed->breed_name;
     }
 
     protected function getActions(): array

@@ -207,7 +207,7 @@ class BlogPostResource extends Resource
                ComponentsSection::make('Post Details')
                ->description('The following information is used to display the post on the website.')
                ->schema([
-                    ImageEntry::make('post_image')->width('full')->height('300px'),
+                    ImageEntry::make('post_image')->width('full')->height('300px')->label('Featured Image'),
                     Group::make([
                         TextEntry::make('post_title')->label('Title')->size(TextEntrySize::Large),
                         TextEntry::make('post_slug')->label('Slug'),

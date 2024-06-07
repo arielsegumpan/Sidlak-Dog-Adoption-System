@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\Resources\Volunteer\VolunteerResource\Pages;
+namespace App\Filament\Resources\Animal\AdoptionResource\Pages;
 
-use App\Filament\Resources\Volunteer\VolunteerResource;
+use App\Filament\Resources\Animal\AdoptionResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
-class EditVolunteer extends EditRecord
+class EditAdoption extends EditRecord
 {
-    protected static string $resource = VolunteerResource::class;
+    protected static string $resource = AdoptionResource::class;
 
     protected function getHeaderActions(): array
     {

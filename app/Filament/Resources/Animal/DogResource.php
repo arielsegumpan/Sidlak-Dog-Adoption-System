@@ -45,7 +45,7 @@ class DogResource extends Resource
 
     protected static ?string $navigationGroup = 'Animal';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 2;
 
     protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::Top;
 
@@ -101,7 +101,8 @@ class DogResource extends Resource
                 ToggleButtons::make('status')
                 ->required()
                 ->options(DogEnum::class)
-                ->inline(),
+                ->inline()
+                ->default('available'),
                 RichEditor::make('dog_description')->required()->columnSpanFull()->maxLength(65535),
 
             ])->columns([

@@ -7,11 +7,17 @@ use App\Filament\Resources\Animal\BreedResource\RelationManagers;
 use App\Models\Animal\Breed;
 use Filament\Forms;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Forms\Set;
+use Filament\Infolists\Components\Group as ComponentsGroup;
+use Filament\Infolists\Components\Section as ComponentsSection;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\TextEntry\TextEntrySize;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\ImageColumn;
@@ -29,7 +35,7 @@ class BreedResource extends Resource
 
     protected static ?string $navigationGroup = 'Animal';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form
     {
@@ -40,19 +46,22 @@ class BreedResource extends Resource
                 ->description('All fields are required')
                 ->collapsible(true)
                 ->schema([
-                    TextInput::make('breed_name')->required()
-                    ->maxLength(255)
-                    ->live(onBlur: true)
-                    ->afterStateUpdated(fn (Set $set, ?string $state) => $set('breed_slug', Str::slug($state))),
+                    Group::make([
+                        TextInput::make('breed_name')->required()
+                        ->maxLength(255)
+                        ->live(onBlur: true)
+                        ->afterStateUpdated(fn (Set $set, ?string $state) => $set('breed_slug', Str::slug($state))),
 
-                    TextInput::make('breed_slug')
-                    ->disabled()
-                    ->dehydrated()
-                    ->required()
-                    ->maxLength(255)
-                    ->unique(Breed::class, 'breed_slug', ignoreRecord: true),
+                        TextInput::make('breed_slug')
+                        ->disabled()
+                        ->dehydrated()
+                        ->required()
+                        ->maxLength(255)
+                        ->unique(Breed::class, 'breed_slug', ignoreRecord: true),
 
-                    Textarea::make('breed_description')->maxLength(1024)->rows(6)->cols(20),
+                        Textarea::make('breed_description')->maxLength(1024)->rows(6)->cols(20),
+                    ]),
+
 
                     FileUpload::make('breed_image')->image()->maxSize(1024)->imageEditor()
                     ->imageEditorAspectRatios([
@@ -60,7 +69,7 @@ class BreedResource extends Resource
                         '4:3',
                         '1:1',
                     ])
-                ])
+                ])->columns(2)
             ]);
     }
 
@@ -111,5 +120,24 @@ class BreedResource extends Resource
             'create' => Pages\CreateBreed::route('/create'),
             'edit' => Pages\EditBreed::route('/{record}/edit'),
         ];
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                ComponentsSection::make('Breed Categories')
+                ->schema([
+                    ComponentsGroup::make([
+                        TextEntry::make('breed_name')->size(TextEntrySize::Large),
+                    ])
+                ])
+                ->columns([
+                    'sm' => 1,
+                    'md' => 2,
+                    'lg' => 2,
+                    'default' => 2
+                ])
+            ]);
     }
 }
