@@ -25,7 +25,7 @@ class BlogPost extends Model
 
     public function comments() : HasMany
     {
-        return $this->hasMany(Comment::class);
+        return $this->hasMany(Comment::class,'post_id','id');
     }
 
     // public function tags()

@@ -13,7 +13,9 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Forms\Set;
+use Filament\Infolists\Components\Actions\Action;
 use Filament\Infolists\Components\Group as ComponentsGroup;
+use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\Section as ComponentsSection;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\TextEntry\TextEntrySize;
@@ -24,6 +26,7 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Str;
 
@@ -76,6 +79,7 @@ class BreedResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultPaginationPageOption(5)
             ->columns([
                 ImageColumn::make('breed_image')->circular()->label('Image'),
                 TextColumn::make('breed_name')->sortable()->searchable()->label('Breed'),
@@ -85,7 +89,7 @@ class BreedResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
+                Tables\Actions\ViewAction::make()->modalHeading('Breed Details')->modalIcon('heroicon-o-rectangle-group'),
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make(),
@@ -126,18 +130,29 @@ class BreedResource extends Resource
     {
         return $infolist
             ->schema([
-                ComponentsSection::make('Breed Categories')
-                ->schema([
-                    ComponentsGroup::make([
-                        TextEntry::make('breed_name')->size(TextEntrySize::Large),
-                    ])
-                ])
-                ->columns([
-                    'sm' => 1,
-                    'md' => 2,
-                    'lg' => 2,
-                    'default' => 2
-                ])
+                ComponentsGroup::make([
+                    ImageEntry::make('breed_image')->label('')->circular(),
+                ]),
+
+                ComponentsGroup::make([
+                    TextEntry::make('breed_name')->size(TextEntrySize::Large)->label('Breed'),
+                    TextEntry::make('breed_slug')->size(TextEntrySize::Small)->label('Slug'),
+                ]),
+
+                ComponentsGroup::make([
+                    TextEntry::make('breed_description')->label('Description'),
+                ])->columnSpanFull()
+            ])
+            ->columns([
+                'sm' => 1,
+                'md' => 2,
+                'lg' => 2,
+                'default' => 2
             ]);
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
     }
 }

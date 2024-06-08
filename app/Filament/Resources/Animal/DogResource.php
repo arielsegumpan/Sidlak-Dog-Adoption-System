@@ -34,6 +34,7 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Str;
 
@@ -111,15 +112,16 @@ class DogResource extends Resource
                 'lg' => 2,
             ]),
 
-            Section::make('Dog Profile Image')
+            Section::make('Dog Profile Photo')
             ->schema([
                 Repeater::make('dog_image')
+                ->label('Photo')
                 ->schema([
                     FileUpload::make('dog_image')->image()->required()->imageEditor() ->imageEditorAspectRatios([
                         null,
                         '1:1',
                         '4:3',
-                    ])->maxSize(2048),
+                    ])->maxSize(2048)->label(''),
                 ])->grid([
                     'sm' => 1,
                     'md' => 2,
@@ -141,6 +143,15 @@ class DogResource extends Resource
                 TextColumn::make('dog_name')->label('Name & Breed')
                 ->description(fn (Dog $record): string => $record?->breed?->breed_name)->wrap()->sortable()->searchable(),
                 TextColumn::make('dog_description')->wrap()->limit(50)->label('Description')->html(),
+                TextColumn::make('status')
+                ->badge()
+                ->color(fn (string $state): string => match ($state) {
+                    'available' => 'success',
+                    'adopted' => 'primary',
+                    'foster' => 'warning',
+                }),
+                TextColumn::make('adoption.user.name')
+                ->label('Adopted by')
             ])
             ->filters([
                 //
@@ -219,7 +230,7 @@ class DogResource extends Resource
                     TextEntry::make('status')->size(TextEntrySize::Large)->badge()->color(fn (string $state): string => match ($state) {
                         'available' => 'success',
                         'adopted' => 'primary',
-                        'fostered' => 'warning',
+                        'fostered' => 'primary',
                     }),
                     TextEntry::make('dog_size')->size(TextEntrySize::Large),
 
@@ -242,5 +253,33 @@ class DogResource extends Resource
                 ])->collapsible()->collapsed(),
 
             ]);
+    }
+
+
+    /** @return Builder<Dog> */
+    public static function getGlobalSearchEloquentQuery(): Builder
+    {
+        return parent::getGlobalSearchEloquentQuery()->with(['breed', 'adoption', 'medicalRecords']);
+    }
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['dog_name', 'breed.breed_name','medicalRecords.type', 'adoption.adoption_number'];
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        /** @var Dog $record */
+        $details = [];
+
+        if ($record->dog_name) {
+            $details['Dog Name'] = $record->dog_name . ' (' . $record->breed->breed_name . ')';
+        }
+
+        // if ($record->breed->breed_name) {
+        //     $details['Breed'] = $record->breed->breed_name;
+        // }
+
+        return $details;
     }
 }

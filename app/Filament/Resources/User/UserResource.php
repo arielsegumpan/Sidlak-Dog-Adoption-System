@@ -1,0 +1,154 @@
+<?php
+
+namespace App\Filament\Resources\User;
+
+use App\Filament\Resources\User\UserResource\Pages;
+use App\Filament\Resources\User\UserResource\RelationManagers;
+use App\Models\User;
+use Filament\Forms;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
+use Filament\Infolists\Components\Section as ComponentsSection;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\TextEntry\TextEntrySize;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+
+class UserResource extends Resource
+{
+    protected static ?string $model = User::class;
+
+    protected static ?string $navigationIcon = 'heroicon-o-user-group';
+
+    protected static ?string $navigationGroup = 'Users & Roles';
+
+    protected static ?int $navigationSort = 1;
+
+    public static function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Section::make('Profile')
+                    ->schema([
+                        TextInput::make('name')->required()->maxLength(255),
+                        TextInput::make('email')->email()->required()->maxLength(255),
+                        TextInput::make('password')->password()->revealable()->required()->maxLength(255),
+                        Select::make('role')
+                        ->native(false)
+                        ->required()
+                        ->options(User::ROLES)
+                    ])->columns([
+                        'sm' => 1,
+                        'md' => 2,
+                        'lg' => 2,
+                        'xl' => 2,
+                    ])
+            ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                TextColumn::make('name')->searchable()->sortable()
+                ->label('Name & Roles')
+                ->description(fn (User $record): string => $record->role_label),
+                TextColumn::make('email')->searchable()->sortable(),
+                TextColumn::make('email_verified_at')->dateTime()->sortable(),
+                TextColumn::make('created_at')->date()->sortable(),
+            ])
+            ->filters([
+                //
+            ])
+            ->actions([
+                Tables\Actions\ViewAction::make(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ])->tooltip('Actions')
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
+            ])
+            ->deferLoading()
+            ->emptyStateActions([
+                Tables\Actions\CreateAction::make()
+                ->icon('heroicon-m-plus')
+                ->label(__('Create User')),
+            ])
+            ->emptyStateIcon('heroicon-o-user-group')
+            ->emptyStateHeading('No users are created');
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListUsers::route('/'),
+            'create' => Pages\CreateUser::route('/create'),
+            'edit' => Pages\EditUser::route('/{record}/edit'),
+        ];
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                TextEntry::make('name')->label('Name')->size(TextEntrySize::Large),
+                TextEntry::make('email')->label('Email'),
+                TextEntry::make('email_verified_at')->label('Email Verified At'),
+                TextEntry::make('created_at')->label('Created At'),
+
+            ])
+            ->columns([
+                'sm' => 1,
+                'md' => 2,
+                'lg' => 2,
+                'default' => 2
+            ]);
+    }
+
+
+    // /** @return Builder<User> */
+    // public static function getGlobalSearchEloquentQuery(): Builder
+    // {
+    //     return parent::getGlobalSearchEloquentQuery()->with(['donations', 'volunteers', 'blogPosts', 'comments']);
+    // }
+
+    // public static function getGloballySearchableAttributes(): array
+    // {
+    //     return ['name', 'post_slug', 'author.name', 'categories.category_name'];
+    // }
+
+    // public static function getGlobalSearchResultDetails(Model $record): array
+    // {
+    //     /** @var User $record */
+    //     $details = [];
+
+    //     if ($record->post_title) {
+    //         $details['Title'] = $record->post_title;
+    //     }
+
+    //     if ($record->author) {
+    //         $details['Author'] = $record->author->name;
+    //     }
+
+    //     return $details;
+    // }
+}

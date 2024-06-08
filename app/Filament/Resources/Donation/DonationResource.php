@@ -36,8 +36,11 @@ class DonationResource extends Resource
                 ->description('All fields are required')
                 ->schema([
                     Select::make('user_id')
+                    ->required()
                     ->label('Donor')
                     ->relationship('user', 'name')
+                    ->preload()
+                    ->optionsLimit(6)
                     ->required()
                     ->searchable(),
                     // ->getSearchResultsUsing(function (Builder $query, string $search): Builder {

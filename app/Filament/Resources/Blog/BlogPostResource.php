@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Blog;
 
 use App\Filament\Resources\Blog\BlogPostResource\Pages;
 use App\Filament\Resources\Blog\BlogPostResource\RelationManagers;
+use App\Filament\Resources\BlogPostResource\Pages\ManageBlogPostComments;
 use App\Models\Blog\BlogPost;
 use App\Models\Blog\Category;
 use Filament\Actions\Action;
@@ -34,6 +35,7 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Str;
 
@@ -119,8 +121,7 @@ class BlogPostResource extends Resource
                     ])
                     ->columns(2),
 
-                Section::make('Image')
-                    ->label('Featured Image')
+                Section::make('Featured Image')
                     ->schema([
                         FileUpload::make('post_image')
                             ->label('Featured Image')
@@ -162,7 +163,6 @@ class BlogPostResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])
-            ->striped()
             ->deferLoading()
             ->emptyStateActions([
                 Tables\Actions\CreateAction::make()
@@ -187,6 +187,7 @@ class BlogPostResource extends Resource
         return $page->generateNavigationItems([
             Pages\ViewBlogPost::class,
             Pages\EditBlogPost::class,
+            ManageBlogPostComments::class
         ]);
     }
 
@@ -195,6 +196,7 @@ class BlogPostResource extends Resource
         return [
             'index' => Pages\ListBlogPosts::route('/'),
             'create' => Pages\CreateBlogPost::route('/create'),
+            'comments' => ManageBlogPostComments::route('/{record}/comments'),
             'edit' => Pages\EditBlogPost::route('/{record}/edit'),
             'view' => Pages\ViewBlogPost::route('/{record}'),
         ];
@@ -227,5 +229,33 @@ class BlogPostResource extends Resource
                     TextEntry::make('post_content')->html()->label(''),
                ])->collapsed()->collapsible()
             ]);
+    }
+
+
+    /** @return Builder<BlogPost> */
+    public static function getGlobalSearchEloquentQuery(): Builder
+    {
+        return parent::getGlobalSearchEloquentQuery()->with(['author', 'categories']);
+    }
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['post_title', 'post_slug', 'author.name', 'categories.category_name'];
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        /** @var BlogPost $record */
+        $details = [];
+
+        if ($record->post_title) {
+            $details['Title'] = $record->post_title;
+        }
+
+        if ($record->author) {
+            $details['Author'] = $record->author->name;
+        }
+
+        return $details;
     }
 }

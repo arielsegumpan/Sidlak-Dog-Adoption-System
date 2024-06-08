@@ -4,6 +4,8 @@ namespace App\Filament\Resources\Animal\AdoptionResource\Pages;
 
 use App\Filament\Resources\Animal\AdoptionResource;
 use Filament\Actions;
+use Filament\Resources\Components\Tab;
+// use Filament\Forms\Components\Tabs\Tab;
 use Filament\Resources\Pages\ListRecords;
 
 class ListAdoptions extends ListRecords
@@ -15,6 +17,21 @@ class ListAdoptions extends ListRecords
         return [
             Actions\CreateAction::make()->icon('heroicon-m-plus'),
         ];
+    }
+
+    public function getTabs(): array
+    {
+        return [
+            null => Tab::make('All'),
+            'Pending' => Tab::make()->query(fn ($query) => $query->where('status', 'pending')),
+            'Approved' => Tab::make()->query(fn ($query) => $query->where('status', 'approved')),
+            'Rejected' => Tab::make()->query(fn ($query) => $query->where('status', 'rejected')),
+        ];
+    }
+
+    protected function getHeaderWidgets(): array
+    {
+        return AdoptionResource::getWidgets();
     }
 
 
