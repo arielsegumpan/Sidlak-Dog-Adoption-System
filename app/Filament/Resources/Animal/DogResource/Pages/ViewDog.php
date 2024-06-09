@@ -11,13 +11,6 @@ class ViewDog extends ViewRecord
 {
     protected static string $resource = DogResource::class;
 
-    protected function mutateFormDataBeforeFill(array $data): array
-    {
-        $data['dog_gender'] = ucfirst($data['dog_gender']);
-        $data['dog_size'] = ucfirst($data['dog_size']);
-
-        return $data;
-    }
 
     public function getTitle(): string | Htmlable
     {

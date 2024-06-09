@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Animal\AdoptionResource\Pages;
 
 use App\Enums\AdoptionEnum;
 use App\Filament\Resources\Animal\AdoptionResource;
+use App\Models\Adoption\Adoption;
 use App\Models\Animal\Dog;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
@@ -32,7 +33,17 @@ class EditAdoption extends EditRecord
         if ($dogId) {
             $dogStatus = $this->determineDogStatus($adoptionStatus);
             Dog::query()->where('id', $dogId)->update(['status' => $dogStatus]);
+            // if (in_array($adoptionStatus, [AdoptionEnum::PENDING->value, AdoptionEnum::REJECTED->value])) {
+            //     Adoption::query()->where('id', $dogId)->update([
+            //         'status' => $dogStatus,
+            //         'user_id' => null
+            //     ]);
+
+
+            // }
+
         }
+
     }
 
     /**

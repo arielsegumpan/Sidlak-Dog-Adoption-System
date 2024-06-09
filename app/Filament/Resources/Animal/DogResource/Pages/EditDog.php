@@ -15,7 +15,10 @@ class EditDog extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            Actions\DeleteAction::make()
+            ->before(function(){
+                dd($this->record);
+            }),
         ];
     }
 

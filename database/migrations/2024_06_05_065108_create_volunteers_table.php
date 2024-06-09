@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('volunteers', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->nullable()->constrained()->cascadeOnDelete();
             $table->enum('role', ['dog_walking', 'event_assistance', 'admin_support', 'community_outreach']);
             $table->text('reason')->nullable();
             $table->enum('status', ['active', 'inactive'])->default('active');

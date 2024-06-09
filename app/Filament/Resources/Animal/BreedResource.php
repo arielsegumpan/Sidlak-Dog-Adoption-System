@@ -131,7 +131,7 @@ class BreedResource extends Resource
         return $infolist
             ->schema([
                 ComponentsGroup::make([
-                    ImageEntry::make('breed_image')->label('')->circular(),
+                    ImageEntry::make('breed_image')->label(''),
                 ]),
 
                 ComponentsGroup::make([
@@ -147,12 +147,7 @@ class BreedResource extends Resource
                 'sm' => 1,
                 'md' => 2,
                 'lg' => 2,
-                'default' => 2
             ]);
     }
 
-    public static function getNavigationBadge(): ?string
-    {
-        return static::getModel()::count();
-    }
 }

@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('adoptions', function (Blueprint $table) {
             $table->id();
             $table->string('adoption_number')->unique();
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('dog_id')->constrained('dogs')->cascadeOnDelete();
+            $table->foreignId('user_id')->nullable()->constrained('users')->cascadeOnDelete();
+            $table->foreignId('dog_id')->nullable()->constrained('dogs')->cascadeOnDelete();
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->date('request_date')->nullable();
             $table->timestamps();

@@ -4,7 +4,7 @@ namespace App\Filament\Resources\Blog;
 
 use App\Filament\Resources\Blog\BlogPostResource\Pages;
 use App\Filament\Resources\Blog\BlogPostResource\RelationManagers;
-use App\Filament\Resources\BlogPostResource\Pages\ManageBlogPostComments;
+use App\Filament\Resources\Blog\BlogPostResource\Pages\ManageBlogPostComments;
 use App\Models\Blog\BlogPost;
 use App\Models\Blog\Category;
 use Filament\Actions\Action;
@@ -209,7 +209,7 @@ class BlogPostResource extends Resource
                ComponentsSection::make('Post Details')
                ->description('The following information is used to display the post on the website.')
                ->schema([
-                    ImageEntry::make('post_image')->width('full')->height('300px')->label('Featured Image'),
+                    ImageEntry::make('post_image')->width('100%')->height(300)->label('Featured Image'),
                     Group::make([
                         TextEntry::make('post_title')->label('Title')->size(TextEntrySize::Large),
                         TextEntry::make('post_slug')->label('Slug'),

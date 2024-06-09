@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\BlogPostResource\Pages;
+namespace App\Filament\Resources\Blog\BlogPostResource\Pages;
 
 // use App\Filament\Resources\Blog\BlogPostResource\Pages;
 

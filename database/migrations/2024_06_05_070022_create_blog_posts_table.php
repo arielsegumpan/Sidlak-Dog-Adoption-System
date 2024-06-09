@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('post_image')->nullable();
             $table->text('post_content');
             $table->boolean('is_published')->default(false);
-            $table->foreignId('author_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('author_id')->nullable()->constrained('users')->cascadeOnDelete();
             $table->timestamps();
         });
     }

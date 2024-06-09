@@ -6,9 +6,13 @@ use App\Filament\Resources\Animal\MedicalRecordResource\Pages;
 use App\Filament\Resources\Animal\MedicalRecordResource\RelationManagers;
 use App\Models\Animal\MedicalRecord;
 use Filament\Forms;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -27,7 +31,13 @@ class MedicalRecordResource extends Resource
     {
         return $form
             ->schema([
-
+                Section::make('Medical Record')
+                    ->description('Please provide the following information about the dog medical record/s.')
+                    ->schema([
+                        Select::make('dog_id')->relationship('dog', 'dog_name')->required()
+                        ->native(false)
+                        ->searchable(true),
+                    ])
             ]);
     }
 
@@ -35,7 +45,12 @@ class MedicalRecordResource extends Resource
     {
         return $table
             ->columns([
-                //
+                ImageColumn::make('dog.first_dog_image')->square(),
+                TextColumn::make('dog.dog_name')->label('Name & Breed')->description(fn (MedicalRecord $record): string => $record?->dog?->breed?->breed_name)->wrap()->sortable()->searchable(),
+                TextColumn::make('type')->searchable()->sortable()->wrap()->limit(40),
+                TextColumn::make('description')->wrap()->limit(60)->html(),
+                TextColumn::make('veterinarian')->wrap()->limit(60)->html(),
+                TextColumn::make('record_date')
             ])
             ->filters([
                 //

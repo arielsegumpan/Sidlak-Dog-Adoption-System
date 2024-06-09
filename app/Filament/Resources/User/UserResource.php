@@ -6,6 +6,7 @@ use App\Filament\Resources\User\UserResource\Pages;
 use App\Filament\Resources\User\UserResource\RelationManagers;
 use App\Models\User;
 use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -40,7 +41,11 @@ class UserResource extends Resource
                     ->schema([
                         TextInput::make('name')->required()->maxLength(255),
                         TextInput::make('email')->email()->required()->maxLength(255),
-                        TextInput::make('password')->password()->revealable()->required()->maxLength(255),
+                        TextInput::make('password')->password()->revealable()->required()->maxLength(255)
+                        ->required(fn (string $context): bool => $context === 'create')
+                        ->dehydrateStateUsing(fn ($state) => !empty($state) ? bcrypt($state) : null)
+                        ->label('Password'),
+                        DatePicker::make('email_verified_at')->required()->native(false)->default(now()),
                         Select::make('role')
                         ->native(false)
                         ->required()
@@ -112,7 +117,7 @@ class UserResource extends Resource
             ->schema([
                 TextEntry::make('name')->label('Name')->size(TextEntrySize::Large),
                 TextEntry::make('email')->label('Email'),
-                TextEntry::make('email_verified_at')->label('Email Verified At'),
+                TextEntry::make('role')->label('Role')->formatStateUsing(fn (User $record): string => $record->role_label) ,
                 TextEntry::make('created_at')->label('Created At'),
 
             ])
@@ -122,6 +127,11 @@ class UserResource extends Resource
                 'lg' => 2,
                 'default' => 2
             ]);
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
     }
 
 

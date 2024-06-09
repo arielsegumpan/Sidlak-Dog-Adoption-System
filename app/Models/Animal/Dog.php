@@ -46,6 +46,11 @@ class Dog extends Model
         return $this->hasOne(Adoption::class);
     }
 
+    public function medicalRecords() : HasMany
+    {
+        return $this->hasMany(MedicalRecord::class, 'dog_id', 'id');
+    }
+
     // public function fosters()
     // {
     //     return $this->hasMany(Foster::class);
@@ -56,8 +61,5 @@ class Dog extends Model
     //     return $this->hasMany(Testimonial::class);
     // }
 
-    public function medicalRecords() : HasMany
-    {
-        return $this->hasMany(MedicalRecord::class);
-    }
+
 }

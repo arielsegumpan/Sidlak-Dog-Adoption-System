@@ -16,6 +16,8 @@ use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -73,10 +75,6 @@ class DonationResource extends Resource
                     ->required()
                     ->native(false)
                     ->default(now())
-
-
-
-
                 ])
                 ->columns([
                     'sm' => 1,
@@ -91,7 +89,14 @@ class DonationResource extends Resource
     {
         return $table
             ->columns([
-                //
+                TextColumn::make('user.name')->label('Donor')->searchable()->sortable(),
+                TextColumn::make('amount')->label('Amount')->searchable()->sortable(),
+                TextColumn::make('donation_type')->sortable(),
+                TextColumn::make('donation_message')->html()->sortable()->wrap()->limit(50),
+                IconColumn::make('is_verified')->boolean()
+                ->trueIcon('heroicon-m-check-circle')
+                ->falseIcon('heroicon-m-x-circle'),
+                TextColumn::make('donation_date')->date()->sortable(),
             ])
             ->filters([
                 //
@@ -133,5 +138,10 @@ class DonationResource extends Resource
             'create' => Pages\CreateDonation::route('/create'),
             'edit' => Pages\EditDonation::route('/{record}/edit'),
         ];
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
     }
 }

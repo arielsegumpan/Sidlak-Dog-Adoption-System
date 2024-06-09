@@ -96,9 +96,21 @@ class VolunteerResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('user.name')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('role')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('reason')->wrap()->limit(60),
-                Tables\Columns\TextColumn::make('status')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('role')->searchable()->sortable()
+                ->formatStateUsing(function (string $state): string {
+                    return ucwords(str_replace('_', ' ', $state));
+                }),
+                Tables\Columns\TextColumn::make('reason')->wrap()->limit(60)->html(),
+                Tables\Columns\TextColumn::make('status')->sortable()
+                ->badge()
+                ->color(fn (string $state): string => match ($state) {
+                    'active' => 'success',
+                    'inactive' => 'danger',
+                })
+                ->icon(fn (string $state): string => match ($state) {
+                    'active' => 'heroicon-o-check-circle',
+                    'inactive' => 'heroicon-o-x-circle',
+                })->formatStateUsing(fn (string $state): string => ucwords($state)),
                 Tables\Columns\TextColumn::make('joined_date')->searchable()->sortable(),
             ])
             ->filters([
@@ -143,6 +155,9 @@ class VolunteerResource extends Resource
         ];
     }
 
-
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
 
 }

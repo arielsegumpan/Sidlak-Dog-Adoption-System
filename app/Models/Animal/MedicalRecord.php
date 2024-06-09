@@ -17,6 +17,6 @@ class MedicalRecord extends Model
 
     public function dog() : BelongsTo
     {
-        return $this->belongsTo(Dog::class);
+        return $this->belongsTo(Dog::class,'dog_id', 'id');
     }
 }
