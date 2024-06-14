@@ -11,7 +11,9 @@ use Filament\Resources\Pages\ListRecords;
 
 class ListDogs extends ListRecords
 {
+
     protected static string $resource = DogResource::class;
+
 
     protected function getHeaderActions(): array
     {

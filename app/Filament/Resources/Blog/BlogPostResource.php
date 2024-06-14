@@ -79,7 +79,7 @@ class BlogPostResource extends Resource
                             ->columnSpan('full'),
 
                         Select::make('categories')
-                        ->multiple()->native(false)->searchable()->preload()->optionsLimit(6)
+                        ->multiple()->native(false)->searchable()->searchDebounce(1200)->preload()->optionsLimit(6)
                         ->required()->relationship(name:'categories', titleAttribute: 'category_name')
                         ->createOptionForm([
                             Section::make('Category Details')
@@ -226,8 +226,8 @@ class BlogPostResource extends Resource
                ]),
                ComponentsSection::make('Content')
                ->schema([
-                    TextEntry::make('post_content')->html()->label(''),
-               ])->collapsed()->collapsible()
+                    TextEntry::make('post_content')->markdown()->label(''),
+               ])->collapsible()
             ]);
     }
 

@@ -14,6 +14,10 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Form;
+use Filament\Infolists\Components\Section as ComponentsSection;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\TextEntry\TextEntrySize;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -48,6 +52,7 @@ class VolunteerResource extends Resource
                     // })
 
                     Select::make('role')
+                    ->label('Volunteer Role')
                     ->required()
                     ->options([
                         'dog_walking' => 'Dog Walking',
@@ -95,8 +100,11 @@ class VolunteerResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('user.name')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('role')->searchable()->sortable()
+                Tables\Columns\TextColumn::make('user.name')->searchable()->sortable()->weight('bold'),
+                Tables\Columns\TextColumn::make('role')
+                ->label('Volunteer Role')
+                ->searchable()
+                ->sortable()
                 ->formatStateUsing(function (string $state): string {
                     return ucwords(str_replace('_', ' ', $state));
                 }),
@@ -158,6 +166,39 @@ class VolunteerResource extends Resource
     public static function getNavigationBadge(): ?string
     {
         return static::getModel()::count();
+    }
+
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                ComponentsSection::make('')
+                ->schema([
+                    TextEntry::make('user.name')->label('Name')->size(TextEntrySize::Large),
+                    TextEntry::make('joined_date'),
+                    TextEntry::make('status')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'active' => 'success',
+                        'inactive' => 'danger',
+                    })
+                    ->icon(fn (string $state): string => match ($state) {
+                        'active' => 'heroicon-o-check-circle',
+                        'inactive' => 'heroicon-o-x-circle',
+                    })->formatStateUsing(fn (string $state): string => ucwords($state)),
+                    TextEntry::make('role')->label('Role')
+                    ->formatStateUsing(function (string $state): string {
+                        return ucwords(str_replace('_', ' ', $state));
+                    }),
+                    TextEntry::make('reason')->markdown()->columnSpanFull(),
+                ])->columns([
+                    'sm' => 1,
+                    'md' => 2,
+                    'lg' => 2,
+                ])
+            ]);
+
     }
 
 }

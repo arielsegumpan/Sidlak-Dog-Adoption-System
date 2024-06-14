@@ -5,13 +5,17 @@ namespace App\Filament\Resources\Animal;
 use App\Enums\AdoptionEnum;
 use App\Enums\DogEnum;
 use App\Filament\Resources\Animal\DogResource\Pages;
+use App\Filament\Resources\Animal\DogResource\Pages\CreateDog;
+use App\Filament\Resources\Animal\DogResource\Pages\EditDog;
+use App\Filament\Resources\Animal\DogResource\Pages\ManageDogMedicalRecord;
+use App\Filament\Resources\Animal\DogResource\Pages\ManageMedicalRecords;
 use App\Filament\Resources\Animal\DogResource\RelationManagers;
+use App\Filament\Resources\Animal\DogResource\RelationManagers\MedicalRecordsRelationManager;
 use App\Filament\Resources\Animal\DogResource\Widgets\DogStatsOverview;
 use App\Models\Animal\Breed;
 use App\Models\Animal\Dog;
-use App\Models\Animal\MedicalRecord;
-use Filament\Actions\Action;
 use Filament\Forms;
+use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Group;
@@ -37,6 +41,9 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\Layout\Panel;
+use Filament\Tables\Columns\Layout\Split;
+use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -76,17 +83,18 @@ class DogResource extends Resource
                     ]),
 
                     Forms\Components\Section::make('Medical Records')
-                    // ->headerActions([
-                    //     Action::make('reset')
-                    //         ->modalHeading('Are you sure?')
-                    //         ->modalDescription('All existing items will be removed from the order.')
-                    //         ->requiresConfirmation()
-                    //         ->color('danger')
-                    //         ->action(fn (Forms\Set $set) => $set('items', [])),
-                    // ])
+                    ->headerActions([
+                        Action::make('reset')
+                            ->modalHeading('Are you sure?')
+                            ->modalDescription('All existing items will be removed from the order.')
+                            ->requiresConfirmation()
+                            ->color('danger')
+                            ->action(fn (Forms\Set $set) => $set('items', [])),
+                    ])
                     ->schema([
                         static::getItemsRepeater(),
-                    ]),
+                    ])
+                    ->visible(fn( $livewire) => $livewire instanceof CreateDog),
 
                 ])->columnSpanFull(),
 
@@ -96,43 +104,54 @@ class DogResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->heading('Registry of All Dogs')
+            ->description('A comprehensive list of all the dogs currently registered in the system, including their statuses and details.')
             ->columns([
-                ImageColumn::make('first_dog_image')
-                ->label('Avatar')
-                ->square(),
-                TextColumn::make('dog_name')->label('Name & Breed')
-                ->description(fn (Dog $record): string => $record?->breed?->breed_name)->wrap()->sortable()->searchable(),
-                TextColumn::make('dog_description')->wrap()->limit(50)->label('Description')->html(),
-                TextColumn::make('status')
-                ->badge()
-                ->color(fn (string $state): string => match ($state) {
-                    'available' => 'success',
-                    'adopted' => 'danger',
-                    'foster' => 'danger',
-                })
-                ->icon(fn (string $state): ?string => match ($state) {
-                    'available' => 'heroicon-o-check-circle',
-                    'adopted' => 'heroicon-o-heart',
-                    'fostered' => 'heroicon-o-hand-thumb-up',
-                })->formatStateUsing(fn (string $state) => ucfirst($state)),
-                TextColumn::make('adoption.user.name')
-                ->label('Adopted by')->placeholder('---')
-                ->getStateUsing(function (Model $record) {
-                    if ($record->adoption && $record->adoption->status === AdoptionEnum::APPROVED->value) {
-                        return $record->adoption->user->name;
-                    }
-                    return '---'; // or return null to use the placeholder
-                })
+                Split::make([
+                    ImageColumn::make('first_dog_image')
+                    ->label('Avatar')
+                    ->width(80)
+                    ->height(80)
+                    ->circular(),
+
+                    Stack::make([
+                        TextColumn::make('dog_name')->label('Name')->weight('bold')->searchable(),
+                        TextColumn::make('breed.breed_name')->label('Breed')->size('xs')->searchable(),
+                    ])
+                    ->space(1)->alignLeft(),
+
+                    TextColumn::make('status')
+                        ->badge()
+                        ->color(fn (string $state): string => match ($state) {
+                            'available' => 'success',
+                            'adopted' => 'danger',
+                            'foster' => 'danger',
+                        })
+                        ->icon(fn (string $state): ?string => match ($state) {
+                            'available' => 'heroicon-o-check-circle',
+                            'adopted' => 'heroicon-o-heart',
+                            'fostered' => 'heroicon-o-hand-thumb-up',
+                        })->formatStateUsing(fn (string $state) => ucfirst($state)),
+                ]),
+
+                Panel::make([
+                    Stack::make([
+                        TextColumn::make('dog_short_description')->wrap()->limit(250)->label('Description')->html(),
+                        TextColumn::make('adoption.status'),
+                    ]),
+                ])->collapsible(),
+            ])
+            ->contentGrid([
+                'md' => 2,
+                'xl' => 2,
             ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\ActionGroup::make([
-                    Tables\Actions\EditAction::make(),
-                    Tables\Actions\DeleteAction::make(),
-                ])->tooltip('Actions')
+                Tables\Actions\ViewAction::make()->icon('heroicon-m-eye')->label(''),
+                Tables\Actions\EditAction::make()->icon('heroicon-m-pencil-square')->label(''),
+                Tables\Actions\DeleteAction::make()->icon('heroicon-m-trash')->label(''),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -159,7 +178,7 @@ class DogResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+
         ];
     }
 
@@ -167,7 +186,8 @@ class DogResource extends Resource
     {
         return $page->generateNavigationItems([
             Pages\ViewDog::class,
-            Pages\EditDog::class,
+            EditDog::class,
+            ManageDogMedicalRecord::class
         ]);
     }
 
@@ -178,6 +198,7 @@ class DogResource extends Resource
             'create' => Pages\CreateDog::route('/create'),
             'edit' => Pages\EditDog::route('/{record}/edit'),
             'view' => Pages\ViewDog::route('/{record}'),
+            'medical_records' => ManageDogMedicalRecord::route('/{record}/medical_records'),
         ];
     }
 
@@ -195,7 +216,11 @@ class DogResource extends Resource
                 ComponentsSection::make('Dog Profile')
                 ->description('The following information is used to display the dog on the website.')
                 ->schema([
-                    ImageEntry::make('first_dog_image')->label('')->width('100%')->height('270px')->square()->columnSpan(1),
+                    ImageEntry::make('first_dog_image')->label('')
+                    ->width(230)
+                    ->height(230)
+                    ->circular()->columnSpan(1)
+                    ->alignCenter(),
 
                     ComponentsGroup::make()
                     ->schema([
@@ -215,8 +240,26 @@ class DogResource extends Resource
                             'fostered' => 'heroicon-o-hand-thumb-up',
                         })->formatStateUsing(fn (string $state) => ucfirst($state)),
                         TextEntry::make('dog_size')->formatStateUsing(fn (string $state) => ucfirst($state)),
-                        TextEntry::make('adoption.user.name')->label('Adopter')->placeholder('---')->formatStateUsing(fn (string $state) => ucfirst($state)),
-                        TextEntry::make('adoption.adoption_number')->label('Adoption #')->placeholder('---')->formatStateUsing(fn (string $state) => ucwords($state))->badge()->color('primary'),
+                        TextEntry::make('adoption.user.name')
+                        ->label('Adopter')->placeholder('---')
+                        ->formatStateUsing(fn (string $state) => ucfirst($state))
+                        ->getStateUsing(function (Model $record) {
+                            if ($record->adoption && $record->adoption->status === AdoptionEnum::APPROVED->value) {
+                                return $record->adoption->user->name; //return user name kung and adoption status is approved
+                            }
+                            return;
+                        }),
+                        TextEntry::make('adoption.adoption_number')
+                        ->label('Adoption #')->placeholder('---')
+                        ->formatStateUsing(fn (string $state) => ucwords($state))
+                        ->badge()
+                        ->color('primary')
+                        ->getStateUsing(function (Model $record) {
+                            if ($record->adoption && $record->adoption->status === AdoptionEnum::APPROVED->value) {
+                                return $record->adoption->adoption_number;
+                            }
+                            return;
+                        }),
                     ])
                     ->columns([
                         'sm' => 1,
@@ -231,22 +274,44 @@ class DogResource extends Resource
                 ]),
 
                 ComponentsSection::make('About the Dog')
+                ->icon('heroicon-o-information-circle')
                 ->schema([
-                    TextEntry::make('dog_description')->html()->label(''),
+                    TextEntry::make('dog_short_description')->markdown()->label(''),
+                    TextEntry::make('dog_long_description')->markdown()->label('')
                 ]),
 
                 ComponentsSection::make('Medical Records')
+                ->icon('heroicon-o-clipboard-document-list')
                 ->schema([
-                    ComponentsGroup::make()
+                    RepeatableEntry::make('medicalRecords')
                     ->schema([
-                        TextEntry::make('medicalRecords.type')->label('Type')->placeholder('---'),
-                        TextEntry::make('medicalRecords.veterinarian')->label('Veterinarian')->placeholder('---'),
-                    ])->columns([
+                        TextEntry::make('record_date')->label('Recorded Date')->date()->placeholder('---')->columnSpan(1),
+                        TextEntry::make('type')->label('Type')->placeholder('---')
+                        ->badge()->color('primary')->columnSpan(1),
+                        TextEntry::make('veterinarian')->label('Veterinarian')->placeholder('---')
+                        ->badge()->color('success'),
+                        TextEntry::make('description')->label('Description')->columnSpanFull()->placeholder('---')->markdown(),
+
+                    ])
+
+                    ->columns([
                         'sm' => 1, 'md' => 2, 'lg' => 2
-                    ]),
-                    TextEntry::make('medicalRecords.description')->label('Description')->html()->placeholder('---'),
-                    TextEntry::make('medicalRecords.record_date')->label('Recorded Date')->badge()->color('success')->dateTime()->placeholder('---'),
-                ])->columnSpanFull()
+                    ])
+                    ->grid([
+                        'sm' => 1, 'md' => 2, 'lg' => 2
+                    ])
+                    // ComponentsGroup::make()
+                    // ->schema([
+                    //     TextEntry::make('medicalRecords.type')->label('Type')->placeholder('---')
+                    //     ->badge()->color('primary'),
+                    //     TextEntry::make('medicalRecords.veterinarian')->label('Veterinarian')->placeholder('---')
+                    //     ->badge()->color('success'),
+                    // ])->columns([
+                    //     'sm' => 1, 'md' => 2, 'lg' => 2
+                    // ]),
+                    // TextEntry::make('medicalRecords.description')->label('Description')->html()->placeholder('---'),
+                    // TextEntry::make('medicalRecords.record_date')->label('Recorded Date')->badge()->color('success')->dateTime()->placeholder('---'),
+                ])->columnSpanFull()->collapsible()->collapsed()
             ]);
     }
 
@@ -271,10 +336,6 @@ class DogResource extends Resource
             $details['Dog Name'] = $record->dog_name . ' (' . $record->breed->breed_name . ')';
         }
 
-        // if ($record->breed->breed_name) {
-        //     $details['Breed'] = $record->breed->breed_name;
-        // }
-
         return $details;
     }
 
@@ -285,9 +346,9 @@ class DogResource extends Resource
          return [
             Group::make()
             ->schema([
-                TextInput::make('dog_name')->required()->maxLength(255)->unique(ignoreRecord: true),
+                TextInput::make('dog_name')->required()->maxLength(255),
 
-                Select::make('breed_id')->relationship('breed', 'breed_name')->required()->preload()->optionsLimit(8)->searchable()->native(false)
+                Select::make('breed_id')->relationship(name:  'breed', titleAttribute:'breed_name')->required()->preload()->optionsLimit(6)->searchable()->searchDebounce(1200)->native(false)
                 ->createOptionForm([
                     Section::make('Breed Details')
                     ->icon('heroicon-o-information-circle')
@@ -332,7 +393,11 @@ class DogResource extends Resource
                 ->options(DogEnum::class)
                 ->inline()
                 ->default('available'),
-                RichEditor::make('dog_description')->required()->columnSpanFull()->maxLength(65535),
+                Textarea::make('dog_short_description')->required()->columnSpanFull()->maxLength(65535)
+                ->label('Short Description')
+                ->rows(7),
+                RichEditor::make('dog_long_description')->required()->columnSpanFull()->maxLength(65535)
+                ->label('Long Description'),
             ])->columns([
                 'sm' => 1,
                 'md' => 2,

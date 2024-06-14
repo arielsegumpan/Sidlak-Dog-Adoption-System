@@ -5,6 +5,7 @@ namespace App\Filament\Resources\User\UserResource\Pages;
 use App\Filament\Resources\User\UserResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Support\Facades\Hash;
 
 class EditUser extends EditRecord
 {
@@ -20,5 +21,18 @@ class EditUser extends EditRecord
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('index');
+    }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+
+        if(array_key_exists('new_password', $data) && filled($data['new_password'])){
+           $this->record->password = Hash::make($data['new_password']);
+        }
+
+
+
+        return $data;
+
     }
 }

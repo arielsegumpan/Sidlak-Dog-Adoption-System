@@ -81,8 +81,8 @@ class BreedResource extends Resource
         return $table
             ->defaultPaginationPageOption(5)
             ->columns([
-                ImageColumn::make('breed_image')->circular()->label('Image'),
-                TextColumn::make('breed_name')->sortable()->searchable()->label('Breed'),
+                ImageColumn::make('breed_image')->circular()->label('Image')->width(50)->height(50),
+                TextColumn::make('breed_name')->sortable()->searchable()->label('Breed')->weight('bold'),
                 TextColumn::make('breed_description')->limit(50)->wrap()->label('Description'),
             ])
             ->filters([

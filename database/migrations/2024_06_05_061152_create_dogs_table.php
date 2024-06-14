@@ -18,7 +18,8 @@ return new class extends Migration
             $table->foreignId('breed_id')->nullable()->constrained('breeds')->cascadeOnDelete();
             $table->string('dog_size');
             $table->enum('dog_gender', ['male', 'female']);
-            $table->text('dog_description')->nullable();
+            $table->text('dog_short_description');
+            $table->text('dog_long_description')->nullable();
             $table->json('dog_image')->nullable();
             $table->enum('status', ['available', 'adopted', 'fostered'])->default('available');
             $table->timestamps();

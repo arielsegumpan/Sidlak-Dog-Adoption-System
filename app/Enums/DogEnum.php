@@ -15,7 +15,7 @@ enum DogEnum: string implements HasIcon, HasColor
     {
         return match ($this) {
             self::Available => 'heroicon-m-check-circle',
-            self::Adopted => 'heroicon-m-x-circle',
+            self::Adopted => 'heroicon-m-heart',
             self::Foster => 'heroicon-m-hand-thumb-up',
         };
     }
@@ -24,7 +24,7 @@ enum DogEnum: string implements HasIcon, HasColor
     {
         return match ($this) {
             self::Available => 'success',
-            self::Adopted => 'primary',
+            self::Adopted => 'danger',
             self::Foster => 'warning',
         };
     }

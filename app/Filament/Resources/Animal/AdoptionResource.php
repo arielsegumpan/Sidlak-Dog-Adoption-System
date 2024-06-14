@@ -7,6 +7,7 @@ use App\Filament\Resources\Animal\AdoptionResource\Pages;
 use App\Filament\Resources\Animal\AdoptionResource\RelationManagers;
 use App\Filament\Resources\Animal\AdoptionResource\Widgets\AdoptionStatsOverview;
 use App\Models\Adoption\Adoption;
+use App\Models\Animal\Dog;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Section;
@@ -20,9 +21,13 @@ use Filament\Infolists\Components\Section as ComponentsSection;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\TextEntry\TextEntrySize;
 use Filament\Infolists\Infolist;
+use Filament\Notifications\Notification;
 use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\Layout\Split;
+use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -59,9 +64,10 @@ class AdoptionResource extends Resource
                     ->columnSpanFull(),
 
                     Select::make('user_id')
-                    ->relationship('user', 'name')
+                    ->relationship(name: 'user', titleAttribute: 'name')
                     ->native(false)
                     ->searchable()
+                    ->searchDebounce(1200)
                     ->preload()
                     ->optionsLimit(6),
 
@@ -71,15 +77,19 @@ class AdoptionResource extends Resource
                         titleAttribute: 'dog_name',
                         modifyQueryUsing: function (Builder $query, string $operation){
                             if($operation == 'create'){
-                                $query->whereDoesntHave('adoption', fn (Builder $query) => $query->where('status', 'approved'));
+                                $query->whereDoesntHave('adoption', fn (Builder $query) => $query->where('status', 'approved'))->with('breed');
                             }
                         },
                     )
-                    ->getOptionLabelsUsing(fn (Model $record) => "{$record->name}")
+                    ->getOptionLabelFromRecordUsing(function ($record) {
+                        return $record->dog_name . ' - ' . ($record->breed->breed_name ?? 'Unknown Breed');
+                    })
                     ->native(false)
                     ->searchable()
+                    ->searchDebounce(1200)
                     ->preload()
-                    ->optionsLimit(6),
+                    ->optionsLimit(5),
+
 
                     DatePicker::make('request_date')
                     ->required()
@@ -95,7 +105,10 @@ class AdoptionResource extends Resource
                         'pending' => 'primary',
                         'approved' => 'success',
                         'rejected' => 'danger',
-                    ])->inline(true),
+                    ])
+                    ->disableOptionWhen(fn (string $value): bool => $value === 'published')
+                    ->in(fn (ToggleButtons $component): array => array_keys($component->getEnabledOptions()))
+                    ->inline(true),
 
                 ])->columns([
                     'sm' => 1,
@@ -109,34 +122,51 @@ class AdoptionResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('adoption_number')
-                ->label('Adoption #')
-                ->sortable()
-                ->searchable()
-                ->badge()
-                ->color('primary'),
+                Split::make([
+                    TextColumn::make('adoption_number')
+                    ->label('Adoption #')
+                    ->sortable()
+                    ->searchable()
+                    ->badge()
+                    ->color('primary'),
 
-                TextColumn::make('user.name')
-                ->label('Adopter')
-                ->searchable()
-                ->sortable(),
+                    TextColumn::make('user.name')
+                    ->label('Adopter')
+                    ->searchable()
+                    ->sortable(),
 
-                TextColumn::make('dog.dog_name')->searchable()->label('Dog Name')->sortable()
-                ->description(fn (Adoption $record): string => $record?->dog?->breed?->breed_name)->wrap(),
+                    ImageColumn::make('dog.first_dog_image')->label('Dog Image')->circular()
+                    ->grow(false)
+                    ->width(70)
+                    ->height(70),
 
-                TextColumn::make('status')->label('Status')->toggleable()
-                ->badge()
-                ->color(fn (string $state): string => match ($state) {
-                    'pending' => 'primary',
-                    'approved' => 'success',
-                    'rejected' => 'danger',
-                })
-                ->icon(fn (string $state): string => match ($state) {
-                    'pending' => 'heroicon-o-clock',
-                    'approved' => 'heroicon-o-hand-thumb-up',
-                    'rejected' => 'heroicon-o-x-circle',
-                })
-                ->formatStateUsing(fn (string $state) => ucfirst($state)),
+                    Stack::make([
+                        TextColumn::make('dog.dog_name')->searchable()->label('Dog Name')
+                        ->label('Dog & Breed')
+                        ->sortable()
+                        ->formatStateUsing(fn (string $state) => ucfirst($state))
+                        ->alignLeft()
+                        ->weight('bold'),
+                        TextColumn::make('dog.breed.breed_name')->searchable()->label('Breed')->size('xs')->alignLeft()
+                        ->formatStateUsing(fn (string $state) => ucfirst('('.$state.')')),
+                    ])->space(1),
+
+
+                    TextColumn::make('status')->label('Status')->toggleable()
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'pending' => 'primary',
+                        'approved' => 'success',
+                        'rejected' => 'danger',
+                    })
+                    ->icon(fn (string $state): string => match ($state) {
+                        'pending' => 'heroicon-o-clock',
+                        'approved' => 'heroicon-o-hand-thumb-up',
+                        'rejected' => 'heroicon-o-x-circle',
+                    })
+                    ->formatStateUsing(fn (string $state) => ucfirst($state)),
+
+                ])
 
 
             ])
@@ -148,11 +178,7 @@ class AdoptionResource extends Resource
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\DeleteAction::make()
-                    // ->before(function ($query) {
-                    //     // Eager load the dog relationship to avoid N+1 issue
-                    //     $query->with('dog');
-                    // })
-                    ->after(function (Adoption $record) {
+                    ->after(function (Model $record) {
                         $dog = $record->dog;
                         if ($dog) {
                             $dog->status = 'available';
@@ -213,14 +239,14 @@ class AdoptionResource extends Resource
                ->icon('heroicon-o-information-circle')
                ->schema([
                     Group::make([
-                        TextEntry::make('dog.dog_name')->label('Dog Name')->size(TextEntrySize::Large)
+                        TextEntry::make('dog.dog_name')->label('Dog Name')->size(TextEntrySize::Large)->weight('bold')
                         ->formatStateUsing(function(Model $record): string {
                                 $breed = $record?->dog?->breed?->breed_name;
                                 $dog = $record?->dog?->dog_name;
                             return $dog . ' (' . $breed . ')';
                         }),
 
-                        ImageEntry::make('dog.first_dog_image')->label('')->square(),
+                        ImageEntry::make('dog.first_dog_image')->label('')->circular(),
                     ])->columnSpan(1),
                    Group::make([
                         TextEntry::make('adoption_number')->label('Adoption #')->size(TextEntrySize::Large)->badge()->color('primary'),

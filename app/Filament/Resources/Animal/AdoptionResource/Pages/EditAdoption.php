@@ -8,11 +8,12 @@ use App\Models\Adoption\Adoption;
 use App\Models\Animal\Dog;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Support\Facades\DB;
 
 class EditAdoption extends EditRecord
 {
     protected static string $resource = AdoptionResource::class;
-
+    protected $oldDogId;
     protected function getHeaderActions(): array
     {
         return [
@@ -25,25 +26,28 @@ class EditAdoption extends EditRecord
         return $this->getResource()::getUrl('index');
     }
 
+    protected function beforeSave() : void
+    {
+        $this->oldDogId = $this->record->getOriginal('dog_id');
+    }
     protected function afterSave(): void
     {
-        $dogId = $this->record->dog_id;
+        $newDogId = $this->record->dog_id;
         $adoptionStatus = $this->record->status;
 
-        if ($dogId) {
-            $dogStatus = $this->determineDogStatus($adoptionStatus);
-            Dog::query()->where('id', $dogId)->update(['status' => $dogStatus]);
-            // if (in_array($adoptionStatus, [AdoptionEnum::PENDING->value, AdoptionEnum::REJECTED->value])) {
-            //     Adoption::query()->where('id', $dogId)->update([
-            //         'status' => $dogStatus,
-            //         'user_id' => null
-            //     ]);
+        if ($this->oldDogId != $newDogId) {
+            DB::transaction(function () use ($newDogId, $adoptionStatus) {
+                Dog::where('id', $this->oldDogId)->update(['status' => 'available']);
 
-
-            // }
-
+                $dogStatus = $this->determineDogStatus($adoptionStatus);
+                Dog::where('id', $newDogId)->update(['status' => $dogStatus]);
+            });
+        }else{
+            DB::transaction(function () use ($newDogId, $adoptionStatus) {
+                $dogStatus = $this->determineDogStatus($adoptionStatus);
+                Dog::where('id', $newDogId)->update(['status' => $dogStatus]);
+            });
         }
-
     }
 
     /**

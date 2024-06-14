@@ -19,7 +19,8 @@ class Dog extends Model
         'breed_id',
         'dog_size',
         'dog_gender',
-        'dog_description',
+        'dog_short_description',
+        'dog_long_description',
         'dog_image',
         'status',
     ];

@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Providers;
+
+use App\Filament\Resources\User\UserResource;
 use Filament\Facades\Filament;
 use Filament\Navigation\NavigationGroup;
 use Filament\Livewire\DatabaseNotifications;

@@ -21,7 +21,8 @@ class CreateAdoption extends CreateRecord
     protected function afterCreate(): void
     {
         $dogId = $this->record->dog_id;
-        if ($dogId) {
+        $adoptionStatus = $this->form->getState()['status'];
+        if ($dogId && $adoptionStatus === "approved") {
             Dog::query()->where('id', $dogId)->update(['status' => 'adopted']);
         }
     }

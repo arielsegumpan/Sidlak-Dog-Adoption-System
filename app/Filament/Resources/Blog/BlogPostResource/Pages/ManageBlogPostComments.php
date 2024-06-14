@@ -33,6 +33,8 @@ class ManageBlogPostComments extends ManageRelatedRecords
 
     protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-oval-left-ellipsis';
 
+    protected static string $badgeColor = 'success';
+
     public function getTitle(): string | Htmlable
     {
         $recordTitle = $this->getRecordTitle();
@@ -92,6 +94,7 @@ class ManageBlogPostComments extends ManageRelatedRecords
         return $table
             ->recordTitleAttribute('post_id')
             ->columns([
+                Tables\Columns\TextColumn::make('user.name')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('blogPost.post_title')->label('Title')->searchable()->sortable()
                 ->limit(50),
                 Tables\Columns\TextColumn::make('content')
@@ -145,7 +148,7 @@ class ManageBlogPostComments extends ManageRelatedRecords
                 ->label('Title'),
                 TextEntry::make('user.name')
                 ->badge()->color('success')
-                ->label('Commented by'),
+                ->label('Commented user'),
                 IconEntry::make('is_approved')
                     ->label('Is approved?')
                     ->boolean()
@@ -156,5 +159,4 @@ class ManageBlogPostComments extends ManageRelatedRecords
                     ->markdown()->columnSpanFull(),
             ]);
     }
-
 }

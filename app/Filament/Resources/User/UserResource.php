@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\User;
 
 use App\Filament\Resources\User\UserResource\Pages;
+use App\Filament\Resources\User\UserResource\Pages\CreateUser;
+use App\Filament\Resources\User\UserResource\Pages\EditUser;
 use App\Filament\Resources\User\UserResource\RelationManagers;
 use App\Models\User;
 use Filament\Forms;
@@ -15,6 +17,7 @@ use Filament\Infolists\Components\Section as ComponentsSection;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\TextEntry\TextEntrySize;
 use Filament\Infolists\Infolist;
+use Filament\Resources\Pages\CreateRecord;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
@@ -22,12 +25,14 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-user-group';
+    protected static ?string $navigationIcon = 'heroicon-o-user';
 
     protected static ?string $navigationGroup = 'Users & Roles';
 
@@ -38,24 +43,84 @@ class UserResource extends Resource
         return $form
             ->schema([
                 Section::make('Profile')
+                    ->icon('heroicon-o-user-circle')
                     ->schema([
                         TextInput::make('name')->required()->maxLength(255),
-                        TextInput::make('email')->email()->required()->maxLength(255),
-                        TextInput::make('password')->password()->revealable()->required()->maxLength(255)
-                        ->required(fn (string $context): bool => $context === 'create')
-                        ->dehydrateStateUsing(fn ($state) => !empty($state) ? bcrypt($state) : null)
-                        ->label('Password'),
+                        TextInput::make('email')->email()->required()->maxLength(255)->unique(ignoreRecord: true),
+
                         DatePicker::make('email_verified_at')->required()->native(false)->default(now()),
-                        Select::make('role')
-                        ->native(false)
-                        ->required()
-                        ->options(User::ROLES)
-                    ])->columns([
+
+                        // Select::make('role')
+                        // ->native(false)
+                        // ->required()
+                        // ->options(User::ROLES),
+                    ])->columnSpan(1),
+
+
+
+                Section::make('Roles and Permission')
+                ->schema([
+                    Select::make('roles')
+                    ->relationship(name: 'roles', titleAttribute: 'name')
+                   ->multiple()
+                   ->preload()
+                   ->optionsLimit(5)
+                   ->searchable(),
+
+                ])->columnSpan(1),
+
+
+                Section::make('User Password')
+                    ->schema([
+                        TextInput::make('password')
+                        ->rule(Password::default())
+                        ->confirmed()
+                        ->password()
+                        ->revealable()
+                        ->columnSpanFull()
+                        ->afterStateHydrated(function (Forms\Components\TextInput $component, $state) {
+                            $component->state('');
+                        })
+                        ->dehydrateStateUsing(fn ($state) => Hash::make($state))
+                        ->dehydrated(fn ($state) => filled($state))
+                        ->required(fn ($livewire) => ($livewire instanceof CreateRecord)),
+
+                        TextInput::make('password_confirmation')
+                        ->same('password')
+                        ->password()
+                        ->revealable()
+                        ->requiredWith('password')
+                    ])->columnSpanFull()
+
+                    // ->columns([
+                    //     'sm' => 1,
+                    //     'md' => 2,
+                    //     'lg' => 2,
+                    //     'xl' => 2,
+                    // ]),
+
+                // Section::make('User New Password')
+                //     ->schema([
+                //         TextInput::make('new_password')
+                //         ->password()
+                //         ->revealable()
+                //         ->dehydrateStateUsing(fn ($state) => Hash::make($state))
+                //         ->rule(Password::default()),
+
+                //         TextInput::make('new_password_confirmation')
+                //         ->password()
+                //         ->revealable()
+                //         ->same('new_password')
+                //         ->requiredWith('new_password')
+
+                // ])->visible(fn( $livewire) => $livewire instanceof EditUser),
+
+            ])
+            ->columns([
                         'sm' => 1,
                         'md' => 2,
                         'lg' => 2,
                         'xl' => 2,
-                    ])
             ]);
     }
 
@@ -64,11 +129,10 @@ class UserResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')->searchable()->sortable()
-                ->label('Name & Roles')
-                ->description(fn (User $record): string => $record->role_label),
+                ->label('Name & Roles'),
+                TextColumn::make('roles.name'),
                 TextColumn::make('email')->searchable()->sortable(),
-                TextColumn::make('email_verified_at')->dateTime()->sortable(),
-                TextColumn::make('created_at')->date()->sortable(),
+                TextColumn::make('email_verified_at')->date()->sortable(),
             ])
             ->filters([
                 //
@@ -117,7 +181,7 @@ class UserResource extends Resource
             ->schema([
                 TextEntry::make('name')->label('Name')->size(TextEntrySize::Large),
                 TextEntry::make('email')->label('Email'),
-                TextEntry::make('role')->label('Role')->formatStateUsing(fn (User $record): string => $record->role_label) ,
+                // TextEntry::make('role')->label('Role')->formatStateUsing(fn (User $record): string => $record->role_label) ,
                 TextEntry::make('created_at')->label('Created At'),
 
             ])

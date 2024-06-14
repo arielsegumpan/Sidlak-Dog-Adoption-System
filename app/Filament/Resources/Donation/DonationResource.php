@@ -14,6 +14,9 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Form;
+use Filament\Infolists\Components\Section as ComponentsSection;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\IconColumn;
@@ -40,11 +43,12 @@ class DonationResource extends Resource
                     Select::make('user_id')
                     ->required()
                     ->label('Donor')
-                    ->relationship('user', 'name')
+                    ->relationship(name: 'user', titleAttribute: 'name')
                     ->preload()
                     ->optionsLimit(6)
                     ->required()
-                    ->searchable(),
+                    ->searchable()
+                    ->searchDebounce(1200),
                     // ->getSearchResultsUsing(function (Builder $query, string $search): Builder {
                     //     return $query->where('name', 'like', "%{$search}%");
                     // }),
@@ -59,12 +63,15 @@ class DonationResource extends Resource
                     ->options([
                         'one-time' => 'One Time',
                         'monthly' => 'Monthly',
-                    ]),
+                    ])
+                    ->native('false'),
 
                     Toggle::make('is_verified')
                     ->required()
                     ->onIcon('heroicon-m-check-circle')
                     ->offIcon('heroicon-m-x-circle')
+                    ->onColor('success')
+                    ->offColor('danger')
                     ->inline(false),
 
                     RichEditor::make('donation_message')
@@ -89,7 +96,7 @@ class DonationResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('user.name')->label('Donor')->searchable()->sortable(),
+                TextColumn::make('user.name')->label('Donor')->searchable()->sortable()->weight('bold'),
                 TextColumn::make('amount')->label('Amount')->searchable()->sortable(),
                 TextColumn::make('donation_type')->sortable(),
                 TextColumn::make('donation_message')->html()->sortable()->wrap()->limit(50),
@@ -143,5 +150,24 @@ class DonationResource extends Resource
     public static function getNavigationBadge(): ?string
     {
         return static::getModel()::count();
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                ComponentsSection::make([
+                    TextEntry::make('user.name')->weight('bold'),
+                    TextEntry::make('amount'),
+                    TextEntry::make('donation_type'),
+                    TextEntry::make('donation_message')->markdown()->columnSpanFull(),
+                    TextEntry::make('donation_date'),
+                ])->columns([
+                    'sm' => 1,
+                    'md' => 2,
+                    'lg' => 3,
+                ])
+            ]);
+
     }
 }

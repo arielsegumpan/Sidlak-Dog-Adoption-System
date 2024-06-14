@@ -6,7 +6,9 @@ use App\Enums\DogEnum;
 use App\Filament\Resources\Animal\DogResource;
 use App\Models\Adoption\Adoption;
 use Filament\Actions;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+
 
 class EditDog extends EditRecord
 {
@@ -15,10 +17,7 @@ class EditDog extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make()
-            ->before(function(){
-                dd($this->record);
-            }),
+            Actions\DeleteAction::make(),
         ];
     }
 
@@ -27,16 +26,27 @@ class EditDog extends EditRecord
         return $this->getResource()::getUrl('index');
     }
 
-
-    protected function afterSave(): void
+    protected function beforeSave(): void
     {
-        $dogId = $this->record->id;
-        $adoptionStatus = $this->record->status;
+        $dogId = $this->getRecord()->id; //kwa id sang ido
+        $adoptionStatus = $this->form->getState()['status']; //kwa state sang status select form
+        $dogExists = Adoption::query()->where('dog_id', $dogId)->exists(); // check kung and id ga exists sa adoption table
+        $dogAdoptionStatus = $this->determineAdoptionStatus($adoptionStatus); // check kung ano nga status para sa adoption
 
-        if ($dogId) {
-            $dogAdoptionStatus = $this->determineAdoptionStatus($adoptionStatus);
-            Adoption::query()->where('id', $dogId)->update(['status' => $dogAdoptionStatus]);
+        if (!$dogExists && $adoptionStatus != "available" && $dogAdoptionStatus != "pending") {
+            Notification::make()
+                ->title('Cannot change adoption status.')
+                ->body('Adopter of ' . $this->getRecord()->dog_name . ' is not exists. ')
+                ->icon('heroicon-o-x-circle')
+                ->iconColor('danger')
+                ->color('danger')
+                ->send();
+            $this->redirect(DogResource::getUrl('index'));
+            $this->halt();
+
         }
+
+        Adoption::query()->where('dog_id', $dogId)->update(['status' => $dogAdoptionStatus]);
     }
 
     /**
