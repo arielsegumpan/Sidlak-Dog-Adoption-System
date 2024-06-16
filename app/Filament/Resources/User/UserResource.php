@@ -57,40 +57,39 @@ class UserResource extends Resource
                     ])->columnSpan(1),
 
 
+                    // Section::make('Roles and Permission')
+                    // ->schema([
+                    //     Select::make('roles')
+                    //     ->relationship(name: 'roles', titleAttribute: 'name')
+                    //    ->multiple()
+                    //    ->preload()
+                    //    ->optionsLimit(5)
+                    //    ->searchable(),
 
-                Section::make('Roles and Permission')
-                ->schema([
-                    Select::make('roles')
-                    ->relationship(name: 'roles', titleAttribute: 'name')
-                   ->multiple()
-                   ->preload()
-                   ->optionsLimit(5)
-                   ->searchable(),
-
-                ])->columnSpan(1),
+                    // ])->columnSpan(1),
 
 
-                Section::make('User Password')
-                    ->schema([
-                        TextInput::make('password')
-                        ->rule(Password::default())
-                        ->confirmed()
-                        ->password()
-                        ->revealable()
-                        ->columnSpanFull()
-                        ->afterStateHydrated(function (Forms\Components\TextInput $component, $state) {
-                            $component->state('');
-                        })
-                        ->dehydrateStateUsing(fn ($state) => Hash::make($state))
-                        ->dehydrated(fn ($state) => filled($state))
-                        ->required(fn ($livewire) => ($livewire instanceof CreateRecord)),
+                    Section::make('User Password')
+                        ->schema([
+                            TextInput::make('password')
+                            ->rule(Password::default())
+                            ->confirmed()
+                            ->password()
+                            ->revealable()
+                            ->columnSpanFull()
+                            ->dehydrateStateUsing(fn ($state) => Hash::make($state))
+                            ->dehydrated(fn ($state) => filled($state))
+                            ->required(fn ($livewire) => ($livewire instanceof CreateRecord)),
 
-                        TextInput::make('password_confirmation')
-                        ->same('password')
-                        ->password()
-                        ->revealable()
-                        ->requiredWith('password')
+                            TextInput::make('password_confirmation')
+                            ->same('password')
+                            ->password()
+                            ->revealable()
+                            ->requiredWith('password')
+
+
                     ])->columnSpanFull()
+
 
                     // ->columns([
                     //     'sm' => 1,

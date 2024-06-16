@@ -21,9 +21,9 @@ class UserSeeder extends Seeder
             'password' => bcrypt('qwerty12345'),
         ]);
 
-        $role = Role::create(['name' => 'admin']);
+        // $role = Role::create(['name' => 'admin']);
 
-        $user->assignRole($role);
+        // $user->assignRole($role);
 
         $totalUsers = 15;
         $progressBar = $this->command->getOutput()->createProgressBar($totalUsers);

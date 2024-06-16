@@ -9,63 +9,23 @@ use App\Models\Blog\BlogPost;
 use App\Models\Blog\Comment;
 use App\Models\Donation\Donation;
 use App\Models\Volunteer\Volunteer;
-use Filament\Models\Contracts\FilamentUser;
-use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Spatie\Permission\Traits\HasRoles;
+use Laravel\Fortify\TwoFactorAuthenticatable;
+use Laravel\Jetstream\HasProfilePhoto;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasFactory, HasRoles, Notifiable;
-
-
-    // const ROLE_ADMIN = 0;
-    // const ROLE_ACCOUNTING = 1;
-    // const ROLE_MANAGER = 2;
-    // const ROLE_EDITOR = 3;
-    // const ROLE_USER = 4;
-    // const ROLE_DEFAULT = self::ROLE_USER;
-    // const ROLES = [
-    //     self::ROLE_ADMIN => 'Admin', //overall access
-    //     self::ROLE_ACCOUNTING => 'Accounting', //manage donations
-    //     self::ROLE_MANAGER => 'Manager', //manage dogs and blogs as well as users
-    //     self::ROLE_EDITOR => 'Editor', //manage dogs and blogs
-    //     self::ROLE_USER => 'User', //view dogs, blogs, comments, adoptions and donations
-    // ];
-
-    // public function getRoleLabelAttribute(): string
-    // {
-    //     return self::ROLES[$this->role] ?? 'Unknown';
-    // }
-
-    // public function canAccessPanel(Panel $panel): bool
-    // {
-    //     return $this->isAdmin() || $this->isAccounting() || $this->isManager() || $this->isEditor();
-    // }
-
-
-    // public function isAdmin(){
-    //     return $this->role === self::ROLE_ADMIN;
-    // }
-
-    // public function isAccounting(){
-    //     return $this->role === self::ROLE_ACCOUNTING;
-    // }
-
-    // public function isManager(){
-    //     return $this->role === self::ROLE_MANAGER;
-    // }
-
-    // public function isEditor(){
-    //     return $this->role === self::ROLE_EDITOR;
-    // }
-
-    // public function isUser(){
-    //     return $this->role === self::ROLE_USER;
-    // }
+    use HasApiTokens;
+    use HasFactory;
+    use HasProfilePhoto;
+    use Notifiable;
+    use TwoFactorAuthenticatable;
 
     /**
      * The attributes that are mass assignable.
@@ -76,6 +36,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'profile_photo_path'
     ];
 
     /**
@@ -86,6 +47,17 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'two_factor_recovery_codes',
+        'two_factor_secret',
+    ];
+
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array<int, string>
+     */
+    protected $appends = [
+        'profile_photo_url',
     ];
 
     /**
@@ -101,35 +73,34 @@ class User extends Authenticatable
         ];
     }
 
-    public function adoptions() : HasMany
+    public function volunteer() : HasOne
+    {
+        return $this->hasOne(Volunteer::class);
+    }
+
+    public function blogPosts() : HasMany
+    {
+        return $this->hasMany(BlogPost::class);
+    }
+
+    public function comments() : HasMany
+    {
+        return $this->hasMany(Comment::class);
+    }
+
+    public function adoption() : HasMany
     {
         return $this->hasMany(Adoption::class);
     }
-
-    // public function fosters()
-    // {
-    //     return $this->hasMany(Foster::class);
-    // }
 
     public function donations() : HasMany
     {
         return $this->hasMany(Donation::class);
     }
 
-    public function volunteers() : HasMany
+    public function permissions() : BelongsToMany
     {
-        return $this->hasMany(Volunteer::class);
-    }
-
-
-    public function blogPosts() : HasMany
-    {
-        return $this->hasMany(BlogPost::class, 'author_id');
-    }
-
-    public function comments() : HasMany
-    {
-        return $this->hasMany(Comment::class);
+        return $this->belongsToMany(Permission::class);
     }
 
 }

@@ -31,6 +31,7 @@ use Filament\Pages\SubNavigationPosition;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -147,6 +148,7 @@ class BlogPostResource extends Resource
                 TextColumn::make('post_slug')->sortable()->label('Slug')->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('post_content')->wrap()->limit(50)->label('Content')->html()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('categories.category_name')->label('Category')->wrap()->badge(),
+                IconColumn::make('is_published')->boolean(),
             ])
             ->filters([
                 //
